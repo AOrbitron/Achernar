@@ -3,7 +3,7 @@
 
 [Achernar](https://www.star-facts.com/achernar/)
 
-项目Eridanus的第一个派生项目
+项目Eridanus的第一个派生项目。但适用场景不止Eridanus
 
 [Eridanus对接Achernar](https://eridanus-doc.netlify.app/docs/%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/ai%E7%BB%98%E7%94%BB/#kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB%E5%BF%85%E7%9C%8B)
 # 简介
@@ -16,7 +16,9 @@
 同时，使用selenium，在多个kaggle账号间切换，实现持久化的ai绘画服务。
 # 部署
 ## 安装python
-[安装python3.11](https://blog.csdn.net/MichaelJiangJunC/article/details/129996726)
+[安装python3.11](https://mirrors.huaweicloud.com/python/3.11.0/python-3.11.0-amd64.exe)
+
+记住第一步勾选add to path就行了，剩下全默认。
 ## 安装依赖
 运行`一键部署脚本.bat`
 # 配置

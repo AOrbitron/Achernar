@@ -8,8 +8,8 @@
 [Eridanus对接Achernar](https://eridanus-doc.netlify.app/docs/%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/ai%E7%BB%98%E7%94%BB/#kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB%E5%BF%85%E7%9C%8B)
 # 简介
 - 1.用kaggle部署ai绘画脚本，自动切换账号
-- 2.使用cpolar调用ai绘画api
-- 3.使用flask在本地部署反向代理，自动刷新cpolar代理链接。
+- 2.使用cpolar让ai绘画api实现内穿
+- 3.使用flask在本地部署反向代理，自动刷新cpolar隧道链接。
 
 综上，本项目可以使你在通过请求本地flask_api，调用部署在kaggle的ai绘画服务，而无需频繁地进入cpolar网站查询你的代理隧道。
 

@@ -77,7 +77,7 @@ def start_instance(email, password):
             return
 
         # 访问目标页面
-        time.sleep(5)  # 等待登录完成
+        time.sleep(10)  # 等待登录完成
 
         driver.get(data["shared_notebook"])
         print("尝试运行项目")

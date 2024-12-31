@@ -95,7 +95,7 @@ def start_instance(email, password):
                 ).click()
             except:
                 print("不知道喵")
-            return
+
 
         # 尝试运行项目
         try:

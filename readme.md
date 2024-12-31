@@ -9,7 +9,7 @@
 # 简介
 - 1.用kaggle部署ai绘画脚本，自动切换账号
 - 2.使用cpolar让ai绘画api实现内穿
-- 3.使用flask在本地部署反向代理，自动刷新cpolar隧道链接。
+- 3.使用flask在本地作为反向代理，自动刷新cpolar隧道链接。
 
 综上，本项目可以使你在通过请求本地flask_api，调用部署在kaggle的ai绘画服务，而无需频繁地进入cpolar网站查询你的代理隧道。
 

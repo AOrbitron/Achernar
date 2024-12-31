@@ -4,7 +4,7 @@ port: 3529
 shared_notebook: ""
 enable_kaggle_extension: true
 enable_cpolar_extension: true
-cpolar_check_interval: 3600
+cpolar_check_interval: 120
 kaggle_change_account_interval: 36000
 
 kaggle_accounts:

@@ -84,8 +84,14 @@ def start_instance(email, password):
 
         # 等待目标页面完全加载（等待特定的 <span> 元素出现）
         try:
+            edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button'
+            WebDriverWait(driver, 100).until(
+                EC.element_to_be_clickable((By.XPATH, edit_button_xpath)))
+        except:
+            pass
+        try:
             edit_button = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
-            WebDriverWait(driver, 1000).until(
+            WebDriverWait(driver, 100).until(
                 EC.element_to_be_clickable((By.XPATH, edit_button))
             ).click()
 

@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 import json
@@ -5,7 +6,7 @@ import datetime
 
 import yaml
 from bs4 import BeautifulSoup
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -146,8 +147,10 @@ def main():
             start_instance(email, password)
             # logout_kaggle(run, email, password)
             # 可选：在两次运行之间添加延时，避免过快执行
-            time.sleep(36000)
+            time.sleep(data['kaggle_change_account_interval'])
             index += 1
+            if index >= len(accounts):
+                index = 0
 
     except Exception as e:
         print("\033[91m任务中断：" + str(e) + "\033[0m")
@@ -203,41 +206,70 @@ def cpolar_main():
 def schedule_cpolar_main(): #cpolar定时任务
     while True:
         cpolar_main()
-        time.sleep(3000)
+        time.sleep(data['cpolar_check_interval'])
 
 
-@app.route('/sdapi/v1/txt2img', methods=['POST'])
-def proxy_request():
+@app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
+@app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
+def proxy_request(path):
     global tunnel_url
     if not tunnel_url:
         return jsonify({"error": "隧道地址未初始化，请稍后再试"}), 503
 
-    print(f"收到外部请求：{request.get_json()}")
+    print(f"收到外部请求：{request.method} {request.url}")
 
     try:
         # 获取请求数据
-        external_request = request.get_json()
+        if request.method == 'GET':
+            external_request = request.args.to_dict()
+        else:
+            external_request = request.get_json()
 
-        # 动态替换域名
-        modified_tunnel_url=f"{tunnel_url}/sdapi/v1/txt2img"
+        # 构建新的URL
+        modified_tunnel_url = f"{tunnel_url}/{path}"
+        if request.query_string:
+            modified_tunnel_url += f"?{request.query_string.decode('utf-8')}"
 
         print(f"转发至新的隧道地址：{modified_tunnel_url}")
-
+        if data['proxy'] is not None and data['proxy'] != '':
+            proxy = data['proxy']
+            os.environ["http_proxy"]=proxy
+            os.environ["https_proxy"]=proxy
+        else:
+            proxies = None
         # 转发请求
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(modified_tunnel_url, json=external_request, headers=headers)
+        # 不要设置 Content-Type, 让 requests 自动处理
+        headers = {key: value for key, value in request.headers.items() if key.lower() != 'host'}
 
-        return jsonify({
-            "status_code": response.status_code,
-            "response": response.json()
-        })
+        response = requests.request(request.method, modified_tunnel_url, params=request.args if request.method == 'GET' else None,
+                                    json=external_request if request.method in ['POST', 'PUT', 'PATCH'] else None,
+                                    data=request.get_data() if request.method not in ['GET', 'POST', 'PUT', 'PATCH'] else None,
+                                    headers=headers, stream=True)
+
+        print(f"转发请求完成，响应状态码：{response.status_code}")
+        # 打印原始响应头
+        print(f"原始响应头：{response.headers}")
+
+        # 直接传递原始响应内容和头部给客户端
+        def generate():
+            for chunk in response.iter_content(chunk_size=8192):
+                yield chunk
+
+        # 移除可能会导致问题的头部
+        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+        headers = [(name, value) for (name, value) in response.headers.items()
+                   if name.lower() not in excluded_headers]
+
+        return Response(generate(), response.status_code, headers)
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
-    threading.Thread(target=schedule_cpolar_main, daemon=True).start()
+    if data["enable_cpolar_extension"]:
+        threading.Thread(target=schedule_cpolar_main, daemon=True).start()
+    if data["enable_kaggle_extension"]:
+        threading.Thread(target=main, daemon=True).start()
 
-    threading.Thread(target=main, daemon=True).start()
-
-    app.run(host='0.0.0.0', port=3529)
+    app.run(host='0.0.0.0', port=data['port'])

@@ -1,9 +1,15 @@
+proxy: ""     #没用，不用管这一项
+port: 3529   #项目运行的端口，可以记录一下
+enable_kaggle_extension: true
+enable_cpolar_extension: true
+cpolar_check_interval: 3600         #cpolar检查时间
+kaggle_change_account_interval: 36000   #kaggle账号切换间隔
 
-kaggle_accounts: #配置多个kaggle账号
-  - email: ""
-    password: ""
-  - email: ""
-    password: ""
-cpolar:      #配置cpolar账号
-  email: ""
-  password: ""
+kaggle_accounts:
+  - email: "你的kaggle账号"
+    password: "密码"
+  - email: "你的第二个kaggle账号"
+    password: "密码"  #以此类推
+cpolar:
+  email: "你的cpolar账号"
+  password: "密码"

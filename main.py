@@ -56,13 +56,13 @@ def start_instance(email, password):
             submit_button_xpath = '//*[@id="site-content"]/div[2]/div[1]/div/div[1]/form/div/div[4]/button[2]'
 
             # 等待登录按钮可点击并点击
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, login_button_xpath))
             ).click()
             time.sleep(1)
 
             # 输入邮箱
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 1000).until(
                 EC.presence_of_element_located((By.XPATH, email_input_xpath))
             ).send_keys(email)
 
@@ -85,7 +85,7 @@ def start_instance(email, password):
         # 等待目标页面完全加载（等待特定的 <span> 元素出现）
         try:
             edit_button = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, edit_button))
             ).click()
 
@@ -97,12 +97,12 @@ def start_instance(email, password):
         # 尝试运行项目
         try:
             save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'  # copy and edit按钮
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, save_version))
             ).click()
             time.sleep(5)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))
             ).click()
 
@@ -112,12 +112,12 @@ def start_instance(email, password):
             account_button_xpath = '//*[@id="site-container"]/div/div[4]/div[2]/div[2]/div/div/div/div'
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/ul[2]/div/li'
 
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, account_button_xpath))
             ).click()
             time.sleep(1.5)
 
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))
             ).click()
             # 退出登录

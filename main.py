@@ -91,12 +91,12 @@ def start_instance(email, password):
         except:
             try:
                 edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
-                WebDriverWait(driver, 60).until(
+                WebDriverWait(driver, 30).until(
                     EC.element_to_be_clickable((By.XPATH, edit_button_xpath))).click()
             except:
                 try:
                     edit_button = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
-                    WebDriverWait(driver, 60).until(
+                    WebDriverWait(driver, 20).until(
                         EC.element_to_be_clickable((By.XPATH, edit_button))
                     ).click()
                 except:

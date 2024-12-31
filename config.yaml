@@ -1,10 +1,11 @@
 proxy: ""     #没用，不用管这一项
-port: 3529   #项目运行的端口，可以记录一下
-shared_notebook: ""           #你的共享笔记本的链接
+port: 3529
+#在shared_notebook填入上面记录的你的【分享链接】
+shared_notebook: ""
 enable_kaggle_extension: true
 enable_cpolar_extension: true
-cpolar_check_interval: 3600         #cpolar检查时间
-kaggle_change_account_interval: 36000   #kaggle账号切换间隔
+cpolar_check_interval: 3600
+kaggle_change_account_interval: 36000
 
 kaggle_accounts:
   - email: "你的kaggle账号"

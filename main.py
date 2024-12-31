@@ -100,7 +100,7 @@ def start_instance(email, password):
             WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, save_version))
             ).click()
-            time.sleep(1.5)
+            time.sleep(5)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))

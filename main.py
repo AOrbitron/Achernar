@@ -88,15 +88,13 @@ def start_instance(email, password):
             WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, edit_button_xpath))).click()
         except:
-            pass
-        try:
-            edit_button = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
-            WebDriverWait(driver, 60).until(
-                EC.element_to_be_clickable((By.XPATH, edit_button))
-            ).click()
-
-        except:
-            print("不知道喵")
+            try:
+                edit_button = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
+                WebDriverWait(driver, 60).until(
+                    EC.element_to_be_clickable((By.XPATH, edit_button))
+                ).click()
+            except:
+                print("不知道喵")
 
             return
 

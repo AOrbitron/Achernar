@@ -95,16 +95,16 @@ def start_instance(email, password):
                 ).click()
             except:
                 print("不知道喵")
-
             return
 
         # 尝试运行项目
         try:
+            time.sleep(10)  # 等待项目加载完成
             save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'  # copy and edit按钮
             WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, save_version))
             ).click()
-            time.sleep(5)
+            time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))

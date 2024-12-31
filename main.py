@@ -84,17 +84,23 @@ def start_instance(email, password):
 
         # 等待目标页面完全加载（等待特定的 <span> 元素出现）
         try:
+
             edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button'
             WebDriverWait(driver, 60).until(
                 EC.element_to_be_clickable((By.XPATH, edit_button_xpath))).click()
         except:
             try:
-                edit_button = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
+                edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
                 WebDriverWait(driver, 60).until(
-                    EC.element_to_be_clickable((By.XPATH, edit_button))
-                ).click()
+                    EC.element_to_be_clickable((By.XPATH, edit_button_xpath))).click()
             except:
-                print("不知道喵")
+                try:
+                    edit_button = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
+                    WebDriverWait(driver, 60).until(
+                        EC.element_to_be_clickable((By.XPATH, edit_button))
+                    ).click()
+                except:
+                    print("不知道喵")
 
 
         # 尝试运行项目

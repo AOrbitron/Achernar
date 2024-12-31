@@ -28,10 +28,10 @@ tunnel_url = None
 chrome_options = Options()
 
 # 根据操作系统判断是否需要添加特定参数
-if platform.system() == 'Linux':
-    chrome_options.add_argument('--headless')  # 无头模式
-    chrome_options.add_argument('--no-sandbox')  # 修复 DevToolsActivePort 错误
-    chrome_options.add_argument('--disable-dev-shm-usage')  # 修复共享内存问题
+
+chrome_options.add_argument('--headless')  # 无头模式
+chrome_options.add_argument('--no-sandbox')  # 修复 DevToolsActivePort 错误
+chrome_options.add_argument('--disable-dev-shm-usage')  # 修复共享内存问题
 
 # 通用设置
 chrome_options.add_argument("--ignore-certificate-errors")

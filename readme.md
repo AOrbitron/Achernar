@@ -14,6 +14,11 @@
 综上，本项目可以使你在通过请求本地flask_api，调用部署在kaggle的ai绘画服务，而无需频繁地进入cpolar网站查询你的代理隧道。
 
 同时，使用selenium，在多个kaggle账号间切换，实现持久化的ai绘画服务。
+# 部署
+## 安装python
+[安装python3.11](https://blog.csdn.net/MichaelJiangJunC/article/details/129996726)
+## 安装依赖
+运行`一键部署脚本.bat`
 # 配置
 ```yaml
 proxy: ""     #没用，不用管这一项

@@ -5,7 +5,7 @@
 
 项目Eridanus的第一个派生项目
 
-[Eridanus对接Achernar]
+[Eridanus对接Achernar](https://eridanus-doc.netlify.app/docs/%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/ai%E7%BB%98%E7%94%BB/#kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB%E5%BF%85%E7%9C%8B)
 # 简介
 - 1.用kaggle部署ai绘画脚本，自动切换账号
 - 2.使用cpolar调用ai绘画api

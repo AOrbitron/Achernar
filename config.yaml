@@ -1,0 +1,9 @@
+
+kaggle_accounts: #配置多个kaggle账号
+  - email: ""
+    password: ""
+  - email: ""
+    password: ""
+cpolar:      #配置cpolar账号
+  email: ""
+  password: ""

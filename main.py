@@ -79,7 +79,7 @@ def start_instance(email, password):
         # 访问目标页面
         time.sleep(5)  # 等待登录完成
 
-        driver.get("https://www.kaggle.com/code/lzrea06/qqbot-simple-reforge-spawner")
+        driver.get(data["shared_notebook"])
         print("尝试运行项目")
 
         # 等待目标页面完全加载（等待特定的 <span> 元素出现）

@@ -4,6 +4,8 @@
 [Achernar](https://www.star-facts.com/achernar/)
 
 项目Eridanus的第一个派生项目
+
+[Eridanus对接Achernar]
 # 简介
 - 1.用kaggle部署ai绘画脚本，自动切换账号
 - 2.使用cpolar调用ai绘画api

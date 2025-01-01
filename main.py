@@ -156,7 +156,8 @@ def main():
         index=0
         accounts = data['kaggle_accounts']
         print(len(accounts))
-        print()
+        print("========== 启动完成 ==========")
+        print("项目地址：https://github.com/avilliai/Achernar  点个star喵，点个star谢谢喵")
         while True:
             email, password = accounts[index]['email'], accounts[index]['password']
             print(f"========== 开始第 {index} 次运行，使用账户：{email} ==========")

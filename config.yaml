@@ -1,17 +1,17 @@
 proxy: ""     #没用，不用管这一项
 port: 3529
-#在shared_notebook填入上面记录的你的【分享链接】
+#在shared_notebook填入记录的你的【分享链接】
 shared_notebook: ""
 enable_kaggle_extension: true
 enable_cpolar_extension: true
-cpolar_check_interval: 120
-kaggle_change_account_interval: 36000
+cpolar_check_interval: 360
+kaggle_change_account_interval: 10
 
 kaggle_accounts:
-  - email: "你的kaggle账号"
-    password: "密码"
-  - email: "你的第二个kaggle账号"
-    password: "密码"  #以此类推
+  - email: "你的邮箱"
+    password: "你的密码"
+  - email: "你的第二个邮箱"
+    password: "你的第二个密码"  #以此类推
 cpolar:
-  email: "你的cpolar账号"
-  password: "密码"
+  email: "cpolar的邮箱"
+  password: "cpolar的密码"

@@ -83,13 +83,18 @@ def start_instance(email, password):
         print("尝试运行项目")
 
         # 等待目标页面完全加载（等待特定的 <span> 元素出现）
+        #case1 xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button
+        #case2 xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
+        #case3 xpath='
         try:
 
-            edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button'
-            WebDriverWait(driver, 40).until(
+            #edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button'
+            edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
+            WebDriverWait(driver, 100).until(
                 EC.element_to_be_clickable((By.XPATH, edit_button_xpath))).click()
-        except:
-            try:
+        except Exception as e:
+            print(f"出错{e}")
+            '''try:
                 edit_button_xpath='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
                 WebDriverWait(driver, 20).until(
                     EC.element_to_be_clickable((By.XPATH, edit_button_xpath))).click()
@@ -100,7 +105,7 @@ def start_instance(email, password):
                         EC.element_to_be_clickable((By.XPATH, edit_button))
                     ).click()
                 except:
-                    print("不知道喵")
+                    print("不知道喵")'''
 
 
         # 尝试运行项目
@@ -112,6 +117,7 @@ def start_instance(email, password):
             ).click()
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
+            #confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             WebDriverWait(driver, 1000).until(
                 EC.element_to_be_clickable((By.XPATH, confirm_button_xpath))
             ).click()
@@ -149,10 +155,10 @@ def main():
     try:
         index=0
         accounts = data['kaggle_accounts']
-
-        email, password = accounts[index]['email'], accounts[index]['password']
-
+        print(len(accounts))
+        print()
         while True:
+            email, password = accounts[index]['email'], accounts[index]['password']
             print(f"========== 开始第 {index} 次运行，使用账户：{email} ==========")
             start_instance(email, password)
             # logout_kaggle(run, email, password)

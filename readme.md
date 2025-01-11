@@ -74,3 +74,5 @@ async with httpx.AsyncClient(timeout=None) as client:
     response = await client.post(url='http://127.0.0.1:3529/sdapi/v1/txt2img', json=payload)
 r = response.json()
 ```
+# 鸣谢
+[spawner](https://github.com/spawner1145) 提供了Achernar的账号切换脚本原型，以及编写了优秀的kaggle脚本。

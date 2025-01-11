@@ -24,24 +24,26 @@
 # 配置
 ```yaml
 proxy: ""     #没用，不用管这一项
-port: 3529   #项目运行的端口，可以记录一下
-shared_notebook: ""           #你的共享笔记本的链接
+port: 3529
+headless: true #是否开启浏览器无头模式
+#在shared_notebook填入记录的你的【分享链接】
+shared_notebook: ""
 enable_kaggle_extension: true
 enable_cpolar_extension: true
-cpolar_check_interval: 3600         #cpolar检查时间
-kaggle_change_account_interval: 36000   #kaggle账号切换间隔
+cpolar_check_interval: 360
+kaggle_change_account_interval: 36000
 
 kaggle_accounts:
-  - email: "你的kaggle账号"
-    password: "密码"
-  - email: "你的第二个kaggle账号"
-    password: "密码"  #以此类推
+  - email: "你的邮箱"
+    password: "你的密码"
+  - email: "你的第二个邮箱"
+    password: "你的第二个密码"  #以此类推
 cpolar:
-  email: "你的cpolar账号"
-  password: "密码"
+  email: "cpolar的邮箱"
+  password: "cpolar的密码"
 ```
 **你可以直接向http://127.0.0.1:3529发送sd绘画请求，而无需再手动去cpolar记录代理隧道地址**。
-```python
+```
 payload = {
         "denoising_strength": 0.5,
         "enable_hr": 'false',

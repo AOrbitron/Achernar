@@ -13,7 +13,7 @@
 
 综上，本项目可以使你在通过请求本地flask_api，调用部署在kaggle的ai绘画服务，而无需频繁地进入cpolar网站查询你的代理隧道。
 
-同时，使用selenium，在多个kaggle账号间切换，实现持久化的ai绘画服务。
+同时，使用playwright，在多个kaggle账号间切换，实现持久化的ai绘画服务。
 # 部署
 ## 安装python
 [安装python3.11](https://mirrors.huaweicloud.com/python/3.11.0/python-3.11.0-amd64.exe)

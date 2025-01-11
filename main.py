@@ -84,8 +84,10 @@ def start_instance(email, password):
     finally:
         if browser:
             print("任务完成，浏览器将关闭")
-            browser.close()
-
+            try:
+                browser.close()
+            except Exception as e:
+                print(f"{str(e)}")
 
 def main():
     try:
@@ -97,6 +99,7 @@ def main():
         while True:
             email, password = accounts[index]['email'], accounts[index]['password']
             print(f"========== 开始第 {index} 次运行，使用账户：{email} ==========")
+
             start_instance(email, password)
             # logout_kaggle(run, email, password)
             # 可选：在两次运行之间添加延时，避免过快执行

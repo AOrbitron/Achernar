@@ -1,6 +1,6 @@
 proxy: ""     #没用，不用管这一项
 port: 3529
-headless: false #是否开启浏览器无头模式，低配服务器建议开启。
+headless: true #是否开启浏览器无头模式，低配服务器建议开启。
 #在shared_notebook填入记录的你的【分享链接】
 shared_notebook: ""
 enable_kaggle_extension: true

@@ -56,18 +56,18 @@ def start_instance(email, password):
             edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
             page.wait_for_selector(edit_button_xpath)
             page.click(edit_button_xpath)
+            print("已进入项目页")
 
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
             save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
             page.wait_for_selector(save_version)
             page.click(save_version)
-
+            print("版本已创建")
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             page.wait_for_selector(confirm_button_xpath)
             page.click(confirm_button_xpath)
-
             print("项目运行中...")
             time.sleep(10)  # 等待运行完成
             page.goto("https://www.kaggle.com/")  # 返回主页准备退出登录

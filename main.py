@@ -32,7 +32,6 @@ def start_instance(email, password):
 
             # 打开新的页面
             page = context.new_page()
-            page.set_viewport_size({"width": 1800, "height": 1000})
 
             # 访问登录页面
             page.goto("https://www.kaggle.com/account/login")
@@ -66,9 +65,8 @@ def start_instance(email, password):
                 page.click(edit_b)
             print("已进入编辑页")
             save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
-            if page.is_visible(save_version):
-                page.wait_for_selector(save_version)
-                page.click(save_version)
+            page.wait_for_selector(save_version)
+            page.click(save_version)
             print("版本已创建")
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
@@ -105,7 +103,7 @@ def kill_instance(email, password):
 
             # 打开新的页面
             page = context.new_page()
-            page.set_viewport_size({"width": 1800, "height": 1000})
+
 
             # 访问登录页面
             page.goto("https://www.kaggle.com/account/login")
@@ -124,6 +122,9 @@ def kill_instance(email, password):
 
             page.click(view_events)
             time.sleep(10)
+            gotit='//*[@id="site-content"]/div[1]/div/div[2]/div'
+            if page.is_visible(gotit):
+                page.click(gotit)
             select_button='//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/ul[1]/li/div/div/div/button'
             page.click(select_button)
             stop_button='//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/ul/li[2]'
@@ -151,7 +152,7 @@ def main():
             print(f"========== 开始第 {index} 次运行，使用账户：{email} ==========")
 
             start_instance(email, password)
-            # logout_kaggle(run, email, password)
+            #kill_instance(email, password)
             # 可选：在两次运行之间添加延时，避免过快执行
             time.sleep(data['kaggle_change_account_interval'])
             #kill_instance(email, password)

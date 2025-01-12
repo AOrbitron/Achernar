@@ -198,7 +198,8 @@ def cpolar_main():
                     columns = row.find_all("td")
                     if len(columns) > 0:
                         url_column = row.find("a")
-                        return url_column['href'] if url_column else "N/A"
+                        newurl=url_column['href'] if url_column else "N/A"
+                        return newurl.replace("http://", "https://")
             return None
         except Exception as e:
             print(f"获取隧道信息失败：{str(e)}")
@@ -209,7 +210,7 @@ def cpolar_main():
         new_tunnel_url = fetch_info_from_website(session, info_url)
 
         if new_tunnel_url:
-            tunnel_url = new_tunnel_url.replace("http://", "https://")
+            tunnel_url = new_tunnel_url
             print(f"最新隧道信息: {tunnel_url}")
         else:
             print("获取隧道信息失败，重新登录中...")

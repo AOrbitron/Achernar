@@ -61,10 +61,14 @@ def start_instance(email, password):
 
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
-
+            edit_b='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
+            if page.is_visible(edit_b):
+                page.click(edit_b)
+            print("已进入编辑页")
             save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
-            page.wait_for_selector(save_version)
-            page.click(save_version)
+            if page.is_visible(save_version):
+                page.wait_for_selector(save_version)
+                page.click(save_version)
             print("版本已创建")
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
@@ -81,8 +85,10 @@ def start_instance(email, password):
             time.sleep(1.5)
             page.click(confirm_button_xpath)
 
+
     except Exception as e:
         print(f"\033[91m任务失败：{str(e)}\033[0m")
+        time.sleep(100000)  # 等待10秒后重试
     finally:
         if browser:
             print("任务完成，浏览器将关闭")

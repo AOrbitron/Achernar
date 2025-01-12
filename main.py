@@ -54,12 +54,14 @@ def start_instance(email, password):
 
             # 等待并点击编辑按钮
             edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
-            page.wait_for_selector(edit_button_xpath)
-            page.click(edit_button_xpath)
+            if page.is_visible(edit_button_xpath):
+                page.wait_for_selector(edit_button_xpath)
+                page.click(edit_button_xpath)
             print("已进入项目页")
 
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
+
             save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
             page.wait_for_selector(save_version)
             page.click(save_version)

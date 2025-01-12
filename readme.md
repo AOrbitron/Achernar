@@ -17,6 +17,7 @@
 ## 安装依赖
 运行`一键部署脚本.bat`
 # 配置
+kaggle和cpolar配置见[链接](https://eridanus-doc.netlify.app/docs/%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/ai%E7%BB%98%E7%94%BB/#kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB%E5%BF%85%E7%9C%8B)
 ```yaml
 proxy: ""     #没用，不用管这一项
 port: 3529

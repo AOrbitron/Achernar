@@ -142,11 +142,11 @@ def main():
             email, password = accounts[index]['email'], accounts[index]['password']
             print(f"========== 开始第 {index} 次运行，使用账户：{email} ==========")
 
-            #start_instance(email, password)
+            start_instance(email, password)
             # logout_kaggle(run, email, password)
             # 可选：在两次运行之间添加延时，避免过快执行
             time.sleep(data['kaggle_change_account_interval'])
-            kill_instance(email, password)
+            #kill_instance(email, password)
             index += 1
             if index >= len(accounts):
                 index = 0

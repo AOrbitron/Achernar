@@ -178,20 +178,24 @@ def cpolar_main():
 
     def login(session, login_url, credentials):
         """ 登录函数，返回是否登录成功 """
-        login_page = session.get(login_url)
-        login_page_soup = BeautifulSoup(login_page.text, 'html.parser')
+        try:
+            login_page = session.get(login_url)
+            login_page_soup = BeautifulSoup(login_page.text, 'html.parser')
 
-        csrf_token = login_page_soup.find('input', {'name': 'csrf_token'})['value']
-        credentials['csrf_token'] = csrf_token
+            csrf_token = login_page_soup.find('input', {'name': 'csrf_token'})['value']
+            credentials['csrf_token'] = csrf_token
 
-        login_response = session.post(login_url, data=credentials)
+            login_response = session.post(login_url, data=credentials)
 
-        if login_response.url == login_url:
-            print("登录失败，请检查您的凭据。")
+            if login_response.url == login_url:
+                print("登录失败，请检查您的凭据。")
+                return False
+            else:
+                print("登录成功。")
+                return True
+        except Exception as e:
+            print(f"登录失败：{str(e)}")
             return False
-        else:
-            print("登录成功。")
-            return True
 
     def fetch_info_from_website(session, info_url):
         """ 获取隧道信息，返回最新的 tunnel_url """
@@ -212,6 +216,7 @@ def cpolar_main():
             return None
         except Exception as e:
             print(f"获取隧道信息失败：{str(e)}")
+            return None
     login(session, login_url, credentials)
 
     while True:
@@ -225,7 +230,7 @@ def cpolar_main():
             print("获取隧道信息失败，重新登录中...")
             # 如果获取链接失败，重新登录
             if not login(session, login_url, credentials):
-                print("无法重新登录，程序终止。")
+                print("无法重新登录。")
             tunnel_url = new_tunnel_url
             print(f"最新隧道信息: {tunnel_url}")
 

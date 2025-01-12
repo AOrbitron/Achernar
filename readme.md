@@ -37,11 +37,11 @@ cpolar:
   email: "cpolar的邮箱"
   password: "cpolar的密码"
 ```
-## 调用
-### 用Eridanus对接
+# 调用
+## 用Eridanus对接
 [Eridanus对接Achernar](https://eridanus-doc.netlify.app/docs/%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/ai%E7%BB%98%E7%94%BB/#kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB%E5%BF%85%E7%9C%8B)
-### 自行编写代码对接
-**你可以直接向http://127.0.0.1:3529发送sd绘画请求，而无需再手动去cpolar记录代理隧道地址**。
+## 自行编写代码对接
+**你可以直接向http://127.0.0.1:3529 发送请求，而无需再手动去cpolar记录代理隧道地址**，比如。
 ```
 payload = {
         "denoising_strength": 0.5,
@@ -74,3 +74,5 @@ async with httpx.AsyncClient(timeout=None) as client:
     response = await client.post(url='http://127.0.0.1:3529/sdapi/v1/txt2img', json=payload)
 r = response.json()
 ```
+# 鸣谢
+[spawner](https://github.com/spawner1145) 提供了Achernar的账号切换脚本原型，以及编写了优秀的kaggle脚本。

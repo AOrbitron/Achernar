@@ -68,6 +68,10 @@ def start_instance(email, password):
             if page.is_visible(edit_c):
                 page.click(edit_c)
                 print("已进入编辑页")
+            edit_d='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
+            if page.is_visible(edit_d):
+                page.click(edit_d)
+                print("已进入编辑页")
             save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
             page.wait_for_selector(save_version)
             page.click(save_version)

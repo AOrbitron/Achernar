@@ -48,7 +48,7 @@ def start_instance(email, password):
             time.sleep(10)  # 等待登录完成
 
             # 访问目标页面
-            page.goto(data["shared_notebook"])  # 替换成目标页面的URL
+            page.goto(data["shared_notebook"],wait_until="load")  # 替换成目标页面的URL
             print("尝试运行项目")
 
             # 等待并点击编辑按钮
@@ -75,15 +75,13 @@ def start_instance(email, password):
             save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
             page.click(save_version)
             print("版本已创建")
-            close_button='//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[1]/div/button'
-            page.click(close_button)
             page.click(save_version)
 
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             page.click(confirm_button_xpath)
             print("项目运行中...")
-            page.goto("https://www.kaggle.com/")  # 返回主页准备退出登录
+            page.goto("https://www.kaggle.com/",wait_until="load")  # 返回主页准备退出登录
 
             # 退出登录
             time.sleep(5)

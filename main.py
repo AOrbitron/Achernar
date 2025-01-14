@@ -40,6 +40,7 @@ def start_instance(email, password):
             # 等待并填写登录信息
             login_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div/div[1]/button[2]'
             page.click(login_button_xpath)
+            page.w
             page.fill('//*[@id=":r0:"]', email)  # 填写邮箱
             page.fill('//*[@id=":r1:"]', password)  # 填写密码
             page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单
@@ -80,6 +81,7 @@ def start_instance(email, password):
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             page.click(confirm_button_xpath)
+            time.sleep(3)
             print("项目运行中...")
             page.goto("https://www.kaggle.com/",wait_until="load")  # 返回主页准备退出登录
 

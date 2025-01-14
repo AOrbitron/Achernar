@@ -71,7 +71,7 @@ def start_instance(email, password):
             if page.is_visible(edit_d):
                 page.click(edit_d)
                 print("已进入编辑页")
-            time.sleep(5)
+            time.sleep(10)
             save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
             page.click(save_version)
             print("版本已创建")

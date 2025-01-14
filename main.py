@@ -45,16 +45,17 @@ def start_instance(email, password):
             page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单
 
             print("登录信息已提交。")
-            time.sleep(10)  # 等待登录完成
+            time.sleep(1000)  # 等待登录完成
 
             # 访问目标页面
-            page.goto(data["shared_notebook"],wait_until="load")  # 替换成目标页面的URL
+            page.goto(data["shared_notebook"])  # 替换成目标页面的URL
             print("尝试运行项目")
 
             # 等待并点击编辑按钮
             edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
-            if page.is_visible(edit_button_xpath):
-                page.click(edit_button_xpath)
+            with page.expect_navigation(wait_until="load"):
+                if page.is_visible(edit_button_xpath):
+                    page.click(edit_button_xpath)
             print("已进入项目页")
 
             # 尝试运行项目
@@ -72,8 +73,16 @@ def start_instance(email, password):
                 page.click(edit_d)
                 print("已进入编辑页")
             time.sleep(10)
+            page.evaluate("""
+                () => {
+                    const blocker1 = document.querySelector('.sc-ftmehX.clyupM');
+                    const blocker2 = document.querySelector('.MuiBackdrop-root');
+                    if (blocker1) blocker1.style.pointerEvents = 'none';
+                    if (blocker2) blocker2.style.pointerEvents = 'none';
+                }
+            """)
             save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
-            page.click(save_version,timeout=100000)
+            page.click(save_version,force=True)
             print("版本已创建")
             page.click(save_version)
 

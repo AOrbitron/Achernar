@@ -45,7 +45,7 @@ def start_instance(email, password):
             page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单
 
             print("登录信息已提交。")
-            time.sleep(100)  # 等待登录完成
+            time.sleep(10)  # 等待登录完成
 
             # 访问目标页面
             page.goto(data["shared_notebook"])  # 替换成目标页面的URL

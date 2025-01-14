@@ -82,9 +82,8 @@ def start_instance(email, password):
                 }
             """)
             save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
-            page.click(save_version,force=True)
+            page.click(save_version,force=True,timeout=10000)
             print("版本已创建")
-            page.click(save_version)
 
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'

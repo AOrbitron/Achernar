@@ -54,7 +54,6 @@ def start_instance(email, password):
             # 等待并点击编辑按钮
             edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
             if page.is_visible(edit_button_xpath):
-                page.wait_for_selector(edit_button_xpath)
                 page.click(edit_button_xpath)
             print("已进入项目页")
 
@@ -72,13 +71,12 @@ def start_instance(email, password):
             if page.is_visible(edit_d):
                 page.click(edit_d)
                 print("已进入编辑页")
-            save_version = '//*[@id="site-content"]/div[2]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
-            page.wait_for_selector(save_version)
+
+            save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
             page.click(save_version)
             print("版本已创建")
             time.sleep(10)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
-            page.wait_for_selector(confirm_button_xpath)
             page.click(confirm_button_xpath)
             print("项目运行中...")
             time.sleep(10)  # 等待运行完成
@@ -102,6 +100,7 @@ def start_instance(email, password):
                 browser.close()
             except Exception as e:
                 print(f"{str(e)}")
+
 def kill_instance(email, password):
     try:
         # 使用 Playwright 启动浏览器

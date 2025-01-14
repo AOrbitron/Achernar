@@ -45,7 +45,7 @@ def start_instance(email, password):
             page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单
 
             print("登录信息已提交。")
-            time.sleep(10)  # 等待登录完成
+            time.sleep(100)  # 等待登录完成
 
             # 访问目标页面
             page.goto(data["shared_notebook"])  # 替换成目标页面的URL
@@ -53,9 +53,9 @@ def start_instance(email, password):
 
             # 等待并点击编辑按钮
             edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
-            with page.expect_navigation(wait_until="load"):
-                if page.is_visible(edit_button_xpath):
-                    page.click(edit_button_xpath)
+
+            if page.is_visible(edit_button_xpath):
+                page.click(edit_button_xpath)
             print("已进入项目页")
 
             # 尝试运行项目

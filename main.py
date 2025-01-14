@@ -40,7 +40,6 @@ def start_instance(email, password):
             # 等待并填写登录信息
             login_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div/div[1]/button[2]'
             page.click(login_button_xpath)
-            page.w
             page.fill('//*[@id=":r0:"]', email)  # 填写邮箱
             page.fill('//*[@id=":r1:"]', password)  # 填写密码
             page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单

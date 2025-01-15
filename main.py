@@ -72,7 +72,8 @@ def start_instance(email, password):
             if page.is_visible(edit_d):
                 page.click(edit_d)
                 print("已进入编辑页")
-            time.sleep(10)
+            print("等待页面加载完成")
+            time.sleep(20)
             page.evaluate("""
                 () => {
                     const blocker1 = document.querySelector('.sc-ftmehX.clyupM');

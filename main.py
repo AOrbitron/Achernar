@@ -269,6 +269,8 @@ def cpolar_main():
             # 如果获取链接失败，重新登录
             if not login(session, login_url, credentials):
                 print("无法重新登录。")
+                time.sleep(data['cpolar_check_interval'])
+                continue
             tunnel_url = new_tunnel_url
             print(f"最新隧道信息: {tunnel_url}")
 

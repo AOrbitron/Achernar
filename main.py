@@ -262,7 +262,7 @@ def cpolar_main():
         # 定时刷新获取隧道 URL
         new_tunnel_url = fetch_info_from_website(session, info_url)
 
-        if new_tunnel_url:
+        if new_tunnel_url!=None and new_tunnel_url!="":
             tunnel_url = new_tunnel_url
             print(f"最新隧道信息: {tunnel_url}")
         else:
@@ -272,8 +272,10 @@ def cpolar_main():
                 print("无法重新登录。")
                 time.sleep(data['cpolar_check_interval'])
                 continue
-            tunnel_url = new_tunnel_url
-            print(f"最新隧道信息: {tunnel_url}")
+            new_tunnel_url = fetch_info_from_website(session, info_url)
+            if new_tunnel_url:
+                tunnel_url = new_tunnel_url
+                print(f"最新隧道信息: {tunnel_url}")
 
         # 等待一段时间后再次获取
         time.sleep(data['cpolar_check_interval'])

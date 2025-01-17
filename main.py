@@ -124,7 +124,8 @@ def start_instance(email, password):
                 page.click(avatar)
                 print("点击账户页面")
             else:
-                print("未找到账户页面")
+                print("未找到账户页面。不影响使用")
+                return
             time.sleep(1.5)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/ul[2]/div/li'
             confirm_button_xpath2= '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/ul[2]/div/li/div/a/div'
@@ -319,8 +320,8 @@ def proxy_request(path):
             modified_tunnel_url += f"?{request.query_string.decode('utf-8')}"
 
         print(f"转发至新的隧道地址：{modified_tunnel_url}")
-        if data['proxy'] is not None and data['proxy'] != '':
-            proxy = data['proxy']
+        if data['quest_proxy'] is not None and data['quest_proxy'] != '':
+            proxy = data['quest_proxy']
             proxies={"http://": proxy, "https://": proxy}
         else:
             proxies = None

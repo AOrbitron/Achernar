@@ -27,7 +27,17 @@ def start_instance(email, password):
     try:
         # 使用 Playwright 启动浏览器
         with sync_playwright() as p:
-            browser = p.chromium.launch(headless=data["headless"], args=["--no-sandbox", "--disable-dev-shm-usage"])
+            launch_args = {
+                "headless": data["headless"],  # 替换为你的 data["headless"]
+                "args": ["--no-sandbox", "--disable-dev-shm-usage"]
+            }
+            proxy = data['proxy']
+            if proxy:  # 如果 proxy 不为空
+                launch_args["proxy"] = {
+                    "server": proxy
+                }
+
+            browser = p.chromium.launch(**launch_args)
             context = browser.new_context()
 
             # 打开新的页面
@@ -72,8 +82,8 @@ def start_instance(email, password):
             if page.is_visible(edit_d):
                 page.click(edit_d)
                 print("已进入编辑页")
-            print("等待页面加载完成")
-            time.sleep(20)
+            print("等待页面加载完成(25秒)")
+            time.sleep(25)
             page.evaluate("""
                 () => {
                     const blocker1 = document.querySelector('.sc-ftmehX.clyupM');
@@ -82,8 +92,13 @@ def start_instance(email, password):
                     if (blocker2) blocker2.style.pointerEvents = 'none';
                 }
             """)
-            save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
-            page.click(save_version,force=True,timeout=10000)
+            save_version1= '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
+            if page.is_visible(save_version1):
+                page.click(save_version1)
+                print("版本已创建")
+            else:
+                save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
+                page.click(save_version,force=True,timeout=None)
             print("版本已创建")
 
             time.sleep(10)
@@ -306,8 +321,7 @@ def proxy_request(path):
         print(f"转发至新的隧道地址：{modified_tunnel_url}")
         if data['proxy'] is not None and data['proxy'] != '':
             proxy = data['proxy']
-            os.environ["http_proxy"]=proxy
-            os.environ["https_proxy"]=proxy
+            proxies={"http://": proxy, "https://": proxy}
         else:
             proxies = None
         # 转发请求

@@ -44,7 +44,7 @@ def start_instance(email, password):
             page = context.new_page()
 
             # 访问登录页面
-            page.goto("https://www.kaggle.com/account/login")
+            page.goto("https://www.kaggle.com/account/login",timeout=None)
             print(f"尝试登录账户 {email}")
 
             # 等待并填写登录信息
@@ -58,7 +58,7 @@ def start_instance(email, password):
             time.sleep(10)  # 等待登录完成
 
             # 访问目标页面
-            page.goto(data["shared_notebook"])  # 替换成目标页面的URL
+            page.goto(data["shared_notebook"],timeout=None)  # 替换成目标页面的URL
             print("尝试运行项目")
 
             # 等待并点击编辑按钮
@@ -106,7 +106,7 @@ def start_instance(email, password):
             page.click(confirm_button_xpath)
             time.sleep(3)
             print("项目运行中...")
-            page.goto("https://www.kaggle.com/",wait_until="load")  # 返回主页准备退出登录
+            page.goto("https://www.kaggle.com/",wait_until="load",timeout=None)  # 返回主页准备退出登录
 
             # 退出登录
             time.sleep(5)

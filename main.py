@@ -32,7 +32,7 @@ def start_instance(email, password):
                 "args": ["--no-sandbox", "--disable-dev-shm-usage"]
             }
             proxy = data['proxy']
-            if proxy:  # 如果 proxy 不为空
+            if proxy!=None and proxy!='' and proxy!="":  # 如果 proxy 不为空
                 launch_args["proxy"] = {
                     "server": proxy
                 }

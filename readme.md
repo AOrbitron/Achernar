@@ -10,6 +10,11 @@
 
 同时，使用playwright，在多个kaggle账号间切换，实现持久化的ai绘画服务。
 # 部署
+## 拉取项目源码
+```
+git clone https://github.com/avilliai/Achernar
+```
+不会用git自己看项目页面有个绿色按钮，点了下载zip压缩包。
 ## 安装python
 [安装python3.11](https://mirrors.huaweicloud.com/python/3.11.0/python-3.11.0-amd64.exe)
 

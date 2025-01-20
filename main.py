@@ -228,6 +228,7 @@ def login(session, login_url, credentials):
         csrf_token = login_page_soup.find('input', {'name': 'csrf_token'})['value']
         credentials['csrf_token'] = csrf_token
         login_response = session.post(login_url, data=credentials)
+
         if login_response.url == login_url:
             print("登录失败，请检查您的凭据。")
             return False
@@ -237,7 +238,6 @@ def login(session, login_url, credentials):
     except Exception as e:
         print(f"登录失败：{str(e)}")
         return False
-
 
 def fetch_info_from_website(session, info_url):
     try:
@@ -254,32 +254,49 @@ def fetch_info_from_website(session, info_url):
             'https://cpolar.com/privacy'
         ]
 
-        links = [a['href'] for a in soup.find_all('a', href=True) if
-                 'https' in a['href'] and 'cpolar' in a['href'] and a['href'] not in excluded_links]
+        links = [
+            a['href'] for a in soup.find_all('a', href=True)
+            if 'https' in a['href'] and 'cpolar' in a['href'] and a['href'] not in excluded_links
+        ]
 
         print(f"提取的所有链接: {links}")
 
-        filtered_links = {f"/v{i}": link.replace("http://", "https://") for i, link in enumerate(links, start=0)}
+        filtered_links = {
+            f"/v{i}": link.replace("http://", "https://")
+            for i, link in enumerate(links, start=0)
+        }
         return filtered_links
     except Exception as e:
         print(f"获取隧道信息失败：{str(e)}")
         return {}
 
-
 def proxy_request(target_host):
     def handler():
-        headers = {key: value for key, value in request.headers.items() if key.lower() != 'host'}
+        headers = {
+            key: value for key, value in request.headers.items() if key.lower() != 'host'
+        }
         modified_tunnel_url = f"{target_host}{request.full_path[len(request.path):]}"
+        proxies = {
+            "http": data['quest_proxy'],
+            "https": data['quest_proxy']
+        } if data['quest_proxy'] else None
 
-        proxies = {"http": data['quest_proxy'], "https": data['quest_proxy']} if data['quest_proxy'] else None
-        response = requests.request(request.method, modified_tunnel_url, params=request.args,
-                                    json=request.json if request.method in ['POST', 'PUT', 'PATCH'] else None,
-                                    data=request.get_data() if request.method not in ['GET', 'POST', 'PUT',
-                                                                                      'PATCH'] else None,
-                                    headers=headers, stream=True, proxies=proxies)
+        response = requests.request(
+            request.method,
+            modified_tunnel_url,
+            params=request.args,
+            json=request.json if request.method in ['POST', 'PUT', 'PATCH'] else None,
+            data=request.get_data() if request.method not in ['GET', 'POST', 'PUT', 'PATCH'] else None,
+            headers=headers,
+            stream=True,
+            proxies=proxies
+        )
 
         excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-        headers = [(name, value) for (name, value) in response.headers.items() if name.lower() not in excluded_headers]
+        headers = [
+            (name, value) for (name, value) in response.headers.items()
+            if name.lower() not in excluded_headers
+        ]
 
         def generate():
             for chunk in response.iter_content(chunk_size=8192):
@@ -289,9 +306,9 @@ def proxy_request(target_host):
 
     return handler
 
-
 def update_routes():
     global target_urls
+
     app.url_map._rules.clear()
     app.url_map._rules_by_endpoint.clear()
     app.view_functions.clear()
@@ -299,24 +316,35 @@ def update_routes():
     @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
     @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
     def catch_all(path):
-        return "Not Found", 404
+        return "未找到", 404
 
     for path, url in target_urls.items():
-        app.add_url_rule(path + '/', defaults={'path': ''}, view_func=proxy_request(url), endpoint=path + '_root',
-                         methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
-        app.add_url_rule(path + '/<path:path>', view_func=proxy_request(url), endpoint=path + '_path',
-                         methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
-        print(f"反向代理已配置: 访问 http://localhost:{data['port']}{path} 将被转发到 {url}")
+        app.add_url_rule(
+            path + '/',
+            defaults={'path': ''},
+            view_func=proxy_request(url),
+            endpoint=path + '_root',
+            methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
+        )
+        app.add_url_rule(
+            path + '/<path:path>',
+            view_func=proxy_request(url),
+            endpoint=path + '_path',
+            methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
+        )
 
+    print(f"反向代理已配置: 访问 http://localhost:{data['port']}{path} 将被转发到 {url}")
 
 def cpolar_main():
     global target_urls
+
     login_url = "https://dashboard.cpolar.com/login"
     info_url = "https://dashboard.cpolar.com/status"
     credentials = {
         'login': data["cpolar"]["email"],
         'password': data["cpolar"]["password"]
     }
+
     session = requests.Session()
 
     if login(session, login_url, credentials):
@@ -325,8 +353,11 @@ def cpolar_main():
             if new_target_urls != target_urls:
                 target_urls = new_target_urls
                 print(f"最新目标URLs: {target_urls}")
-                update_routes()
-                print("已更新路由规则。")
+                try:
+                    update_routes()
+                    print("已更新路由规则。")
+                except Exception as e:
+                    print(f"更新路由规则失败：{str(e)}")
             time.sleep(data['cpolar_check_interval'])
 def schedule_cpolar_main(): #cpolar定时任务
     cpolar_main()

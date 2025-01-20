@@ -271,11 +271,11 @@ def fetch_info_from_website(session, info_url):
         return {}
 
 def proxy_request(target_host):
-    def handler():
+    def handler(path=None, **kwargs):  # 接收 `path` 参数
         headers = {
             key: value for key, value in request.headers.items() if key.lower() != 'host'
         }
-        modified_tunnel_url = f"{target_host}{request.full_path[len(request.path):]}"
+        modified_tunnel_url = f"{target_host}/{path or ''}"  # 使用 `path`
         proxies = {
             "http": data['quest_proxy'],
             "https": data['quest_proxy']

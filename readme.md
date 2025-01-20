@@ -47,7 +47,9 @@ cpolar:
 ## 用Eridanus对接
 [Eridanus对接Achernar](https://eridanus-doc.netlify.app/docs/%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/ai%E7%BB%98%E7%94%BB/#kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB%E5%BF%85%E7%9C%8B)
 ## 自行编写代码对接
-**你可以直接向http://127.0.0.1:3529 发送请求，而无需再去cpolar手动记录代理隧道地址**，比如。
+**你可以直接向`http://127.0.0.1:3529/v0` 或者`http://localhost:3529/v1` 发送请求，而无需再去cpolar手动记录代理隧道地址**，比如。
+
+部分kaggle脚本使用了双卡运行，实际上
 ```
 payload = {
         "denoising_strength": 0.5,
@@ -77,7 +79,7 @@ payload = {
     }  #manba out
 
 async with httpx.AsyncClient(timeout=None) as client:
-    response = await client.post(url='http://127.0.0.1:3529/sdapi/v1/txt2img', json=payload)
+    response = await client.post(url='http://127.0.0.1:3529/v0/sdapi/v1/txt2img', json=payload)
 r = response.json()
 ```
 # 鸣谢

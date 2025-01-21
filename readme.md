@@ -47,16 +47,8 @@ cpolar:
 ## 用Eridanus对接
 [Eridanus对接Achernar](https://eridanus-doc.netlify.app/docs/%E6%8B%93%E5%B1%95%E5%8A%9F%E8%83%BD/ai%E7%BB%98%E7%94%BB/#kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB%E5%BF%85%E7%9C%8B)
 ## 自行编写代码对接
-当你启动后，可以看到类似这样的输出。
 ```
-最新目标URLs: {'/v0': 'https://266942b4.r33.cpolar.top', '/v1': 'https://425125d2.r33.cpolar.top'}
-反向代理已配置: 访问 http://localhost:3529/v0 将被转发到 https://266942b4.r33.cpolar.top
-反向代理已配置: 访问 http://localhost:3529/v1 将被转发到 https://425125d2.r33.cpolar.top
-```
-这意味着http://localhost:3529/v0和http://localhost:3529/v1都是可用的，你可以轮询这两个地址，均衡负载。<br>
-如果只出现一个也是正常的，因为并不是所有kaggle脚本都启用了双卡运行，这种情况下，你向出现的那一个地址发请求就可以了。
-
-**你可以直接向`http://127.0.0.1:3529/v0` 或者`http://localhost:3529/v1` 发送请求，而无需再去cpolar手动记录代理隧道地址**，比如。
+**你可以直接向`http://127.0.0.1:3529` 发送请求，而无需再去cpolar手动记录代理隧道地址**，比如。
 
 ```
 payload = {
@@ -87,7 +79,7 @@ payload = {
     }  #manba out
 
 async with httpx.AsyncClient(timeout=None) as client:
-    response = await client.post(url='http://127.0.0.1:3529/v0/sdapi/v1/txt2img', json=payload)
+    response = await client.post(url='http://127.0.0.1:3529/sdapi/v1/txt2img', json=payload)
 r = response.json()
 ```
 # 鸣谢

@@ -221,123 +221,8 @@ def main():
         print("\033[91m任务中断：" + str(e) + "\033[0m")
 
 
-def login(session, login_url, credentials):
-    try:
-        login_page = session.get(login_url)
-        login_page_soup = BeautifulSoup(login_page.text, 'html.parser')
-        csrf_token = login_page_soup.find('input', {'name': 'csrf_token'})['value']
-        credentials['csrf_token'] = csrf_token
-        login_response = session.post(login_url, data=credentials)
-
-        if login_response.url == login_url:
-            print("登录失败，请检查您的凭据。")
-            return False
-        else:
-            print("登录成功。")
-            return True
-    except Exception as e:
-        print(f"登录失败：{str(e)}")
-        return False
-
-def fetch_info_from_website(session, info_url):
-    try:
-        response = session.get(info_url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        excluded_links = [
-            'https://www.cpolar.com/download',
-            'https://www.cpolar.com/docs',
-            'https://www.cpolar.com',
-            'https://www.cpolar.com/2024end',
-            'https://cpolar.com/tos',
-            'https://cpolar.com/privacy'
-        ]
-
-        links = [
-            a['href'] for a in soup.find_all('a', href=True)
-            if 'https' in a['href'] and 'cpolar' in a['href'] and a['href'] not in excluded_links
-        ]
-
-        print(f"提取的所有链接: {links}")
-
-        filtered_links = {
-            f"/v{i}": link.replace("http://", "https://")
-            for i, link in enumerate(links, start=0)
-        }
-        return filtered_links
-    except Exception as e:
-        print(f"获取隧道信息失败：{str(e)}")
-        return {}
-
-def proxy_request(target_host):
-    def handler(path=None, **kwargs):  # 接收 `path` 参数
-        headers = {
-            key: value for key, value in request.headers.items() if key.lower() != 'host'
-        }
-        modified_tunnel_url = f"{target_host}/{path or ''}"  # 使用 `path`
-        proxies = {
-            "http": data['quest_proxy'],
-            "https": data['quest_proxy']
-        } if data['quest_proxy'] else None
-
-        response = requests.request(
-            request.method,
-            modified_tunnel_url,
-            params=request.args,
-            json=request.json if request.method in ['POST', 'PUT', 'PATCH'] else None,
-            data=request.get_data() if request.method not in ['GET', 'POST', 'PUT', 'PATCH'] else None,
-            headers=headers,
-            stream=True,
-            proxies=proxies
-        )
-
-        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-        headers = [
-            (name, value) for (name, value) in response.headers.items()
-            if name.lower() not in excluded_headers
-        ]
-
-        def generate():
-            for chunk in response.iter_content(chunk_size=8192):
-                yield chunk
-
-        return Response(generate(), response.status_code, headers)
-
-    return handler
-
-def update_routes():
-    global target_urls
-
-    app.url_map._rules.clear()
-    app.url_map._rules_by_endpoint.clear()
-    app.view_functions.clear()
-
-    @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
-    @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
-    def catch_all(path):
-        return "未找到", 404
-
-    for path, url in target_urls.items():
-        app.add_url_rule(
-            path + '/',
-            defaults={'path': ''},
-            view_func=proxy_request(url),
-            endpoint=path + '_root',
-            methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
-        )
-        app.add_url_rule(
-            path + '/<path:path>',
-            view_func=proxy_request(url),
-            endpoint=path + '_path',
-            methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']
-        )
-
-    print(f"反向代理已配置: 访问 http://localhost:{data['port']}{path} 将被转发到 {url}")
-
 def cpolar_main():
-    global target_urls
-
+    global tunnel_url
     login_url = "https://dashboard.cpolar.com/login"
     info_url = "https://dashboard.cpolar.com/status"
     credentials = {
@@ -345,22 +230,131 @@ def cpolar_main():
         'password': data["cpolar"]["password"]
     }
 
+    # 创建一个 Session 对象，避免每次请求都重新登录
     session = requests.Session()
 
-    if login(session, login_url, credentials):
-        while True:
-            new_target_urls = fetch_info_from_website(session, info_url)
-            if new_target_urls != target_urls:
-                target_urls = new_target_urls
-                print(f"最新目标URLs: {target_urls}")
-                try:
-                    update_routes()
-                    print("已更新路由规则。")
-                except Exception as e:
-                    print(f"更新路由规则失败：{str(e)}")
-            time.sleep(data['cpolar_check_interval'])
+    def login(session, login_url, credentials):
+        """ 登录函数，返回是否登录成功 """
+        try:
+            login_page = session.get(login_url)
+            login_page_soup = BeautifulSoup(login_page.text, 'html.parser')
+
+            csrf_token = login_page_soup.find('input', {'name': 'csrf_token'})['value']
+            credentials['csrf_token'] = csrf_token
+
+            login_response = session.post(login_url, data=credentials)
+
+            if login_response.url == login_url:
+                print("登录失败，请检查您的凭据。")
+                return False
+            else:
+                print("登录成功。")
+                return True
+        except Exception as e:
+            print(f"登录失败：{str(e)}")
+            return False
+
+    def fetch_info_from_website(session, info_url):
+        """ 获取隧道信息，返回最新的 tunnel_url """
+        try:
+            response = session.get(info_url)
+            response.raise_for_status()
+
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                table_rows = soup.select("table tbody tr")
+                row = table_rows[-1] if table_rows else None
+                if row:
+                    columns = row.find_all("td")
+                    if len(columns) > 0:
+                        url_column = row.find("a")
+                        newurl=url_column['href'] if url_column else "N/A"
+                        return newurl.replace("http://", "https://")
+            return None
+        except Exception as e:
+            print(f"获取隧道信息失败：{str(e)}")
+            return None
+    login(session, login_url, credentials)
+
+    while True:
+        # 定时刷新获取隧道 URL
+        new_tunnel_url = fetch_info_from_website(session, info_url)
+
+        if new_tunnel_url!=None and new_tunnel_url!="":
+            tunnel_url = new_tunnel_url
+            print(f"最新隧道信息: {tunnel_url}")
+        else:
+            print("获取隧道信息失败，重新登录中...")
+            # 如果获取链接失败，重新登录
+            if not login(session, login_url, credentials):
+                print("无法重新登录。")
+                time.sleep(data['cpolar_check_interval'])
+                continue
+            new_tunnel_url = fetch_info_from_website(session, info_url)
+            if new_tunnel_url:
+                tunnel_url = new_tunnel_url
+                print(f"最新隧道信息: {tunnel_url}")
+
+        # 等待一段时间后再次获取
+        time.sleep(data['cpolar_check_interval'])
 def schedule_cpolar_main(): #cpolar定时任务
     cpolar_main()
+
+@app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
+@app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
+def proxy_request(path):
+    global tunnel_url
+    if not tunnel_url:
+        return jsonify({"error": "隧道地址未初始化，请稍后再试"}), 503
+
+    print(f"收到外部请求：{request.method} {request.url}")
+
+    try:
+        # 获取请求数据
+        if request.method == 'GET':
+            external_request = request.args.to_dict()
+        else:
+            external_request = request.get_json()
+
+        # 构建新的URL
+        modified_tunnel_url = f"{tunnel_url}/{path}"
+        if request.query_string:
+            modified_tunnel_url += f"?{request.query_string.decode('utf-8')}"
+
+        print(f"转发至新的隧道地址：{modified_tunnel_url}")
+        if data['quest_proxy'] is not None and data['quest_proxy'] != '':
+            proxy = data['quest_proxy']
+            proxies={"http://": proxy, "https://": proxy}
+        else:
+            proxies = None
+        # 转发请求
+        # 不要设置 Content-Type, 让 requests 自动处理
+        headers = {key: value for key, value in request.headers.items() if key.lower() != 'host'}
+
+        response = requests.request(request.method, modified_tunnel_url, params=request.args if request.method == 'GET' else None,
+                                    json=external_request if request.method in ['POST', 'PUT', 'PATCH'] else None,
+                                    data=request.get_data() if request.method not in ['GET', 'POST', 'PUT', 'PATCH'] else None,
+                                    headers=headers, stream=True)
+
+        print(f"转发请求完成，响应状态码：{response.status_code}")
+        # 打印原始响应头
+        print(f"原始响应头：{response.headers}")
+
+        # 直接传递原始响应内容和头部给客户端
+        def generate():
+            for chunk in response.iter_content(chunk_size=8192):
+                yield chunk
+
+        # 移除可能会导致问题的头部
+        excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+        headers = [(name, value) for (name, value) in response.headers.items()
+                   if name.lower() not in excluded_headers]
+
+        return Response(generate(), response.status_code, headers)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 

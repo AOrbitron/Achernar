@@ -334,7 +334,7 @@ def proxy_request(path):
         response = requests.request(request.method, modified_tunnel_url, params=request.args if request.method == 'GET' else None,
                                     json=external_request if request.method in ['POST', 'PUT', 'PATCH'] else None,
                                     data=request.get_data() if request.method not in ['GET', 'POST', 'PUT', 'PATCH'] else None,
-                                    headers=headers, stream=True)
+                                    headers=headers, stream=True,proxies=proxies)
 
         print(f"转发请求完成，响应状态码：{response.status_code}")
         # 打印原始响应头

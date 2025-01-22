@@ -22,7 +22,9 @@ with open('config.yaml', 'r', encoding='utf-8') as f:
 app = Flask(__name__)
 
 # 全局变量，存储最新的隧道地址
-target_urls = {}
+tunnel_url=[]
+global url_index
+url_index = 0
 
 def start_instance(email, password):
     try:
@@ -261,6 +263,7 @@ def cpolar_main():
             response.raise_for_status()
 
             if response.status_code == 200:
+                tunnels=[]
                 soup = BeautifulSoup(response.text, 'html.parser')
                 table_rows = soup.select("table tbody tr")
                 row = table_rows[-1] if table_rows else None
@@ -269,7 +272,19 @@ def cpolar_main():
                     if len(columns) > 0:
                         url_column = row.find("a")
                         newurl=url_column['href'] if url_column else "N/A"
-                        return newurl.replace("http://", "https://")
+                        tunnels.append(newurl.replace("http://", "https://"))
+
+                try:
+                    row = table_rows[-3] if table_rows else None
+                    if row:
+                        columns = row.find_all("td")
+                        if len(columns) > 0:
+                            url_column = row.find("a")
+                            newurl = url_column['href'] if url_column else "N/A"
+                            tunnels.append(newurl)
+                except Exception as e:
+                    print(f"获取隧道信息2失败：{str(e)}")
+                return tunnels
             return None
         except Exception as e:
             print(f"获取隧道信息失败：{str(e)}")
@@ -303,7 +318,7 @@ def schedule_cpolar_main(): #cpolar定时任务
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 def proxy_request(path):
-    global tunnel_url
+    global tunnel_url,url_index
     if not tunnel_url:
         return jsonify({"error": "隧道地址未初始化，请稍后再试"}), 503
 
@@ -317,7 +332,10 @@ def proxy_request(path):
             external_request = request.get_json()
 
         # 构建新的URL
-        modified_tunnel_url = f"{tunnel_url}/{path}"
+        current_url = tunnel_url[url_index]
+        url_index = (url_index + 1) % len(tunnel_url)
+
+        modified_tunnel_url = f"{current_url}/{path}"
         if request.query_string:
             modified_tunnel_url += f"?{request.query_string.decode('utf-8')}"
 

@@ -331,7 +331,6 @@ def proxy_request(path):
         else:
             external_request = request.get_json()
 
-        # 构建新的URL
         current_url = tunnel_url[url_index]
         url_index = (url_index + 1) % len(tunnel_url)
 

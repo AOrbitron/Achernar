@@ -324,7 +324,7 @@ def proxy_request(path):
         print(f"转发至新的隧道地址：{modified_tunnel_url}")
         if data['quest_proxy'] is not None and data['quest_proxy'] != '':
             proxy = data['quest_proxy']
-            proxies={"http://": proxy, "https://": proxy}
+            proxies={"http": proxy, "https": proxy}
         else:
             proxies = None
         # 转发请求

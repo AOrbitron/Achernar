@@ -330,6 +330,8 @@ def proxy_request(path):
             external_request = request.args.to_dict()
         else:
             external_request = request.get_json()
+        if len(tunnel_url)==1:
+            url_index=0
 
         current_url = tunnel_url[url_index]
         url_index = (url_index + 1) % len(tunnel_url)

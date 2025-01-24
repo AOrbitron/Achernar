@@ -7,7 +7,7 @@ shared_notebook: ""
 enable_kaggle_extension: true
 enable_cpolar_extension: true
 cpolar_check_interval: 180
-kaggle_change_account_interval: 39600
+kaggle_change_account_interval: 43200
 
 kaggle_accounts:
   - email: "你的邮箱"

@@ -86,8 +86,8 @@ def start_instance(email, password):
             if page.is_visible(edit_d):
                 page.click(edit_d)
                 print("已进入编辑页")
-            print("等待页面加载完成(25秒)")
-            time.sleep(25)
+            print("等待页面加载完成(30秒)")
+            time.sleep(33)
             page.evaluate("""
                 () => {
                     const blocker1 = document.querySelector('.sc-ftmehX.clyupM');
@@ -105,7 +105,7 @@ def start_instance(email, password):
                 page.click(save_version,force=True,timeout=900000)
             print("版本已创建")
 
-            time.sleep(10)
+            time.sleep(15)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             page.click(confirm_button_xpath)
             time.sleep(3)

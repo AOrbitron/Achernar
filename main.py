@@ -95,26 +95,27 @@ def start_instance(email, password):
                 }
             """)
 
-            edit_buttons = [
+            save_version_buttons = [
                 '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
                 '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
                 '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
             ]
 
             clicked = False
-            for edit_button in edit_buttons:
+            for save_version_button in save_version_buttons:
                 try:
-                    page.wait_for_selector(edit_button, state="visible",
+                    page.wait_for_selector(save_version_button, state="visible",
                                            timeout=30000)  # 使用wait_for_selector替换is_visable
-                    page.click(edit_button)
-                    print("已进入编辑页")
+                    page.click(save_version_button)
+                    print("已保存版本")
                     clicked = True
                     break
                 except Exception as e:
-                    print(f"尝试点击 {edit_button} 失败: {e}")
+                    print(f"尝试点击 {save_version_button} 失败: {e}")
             time.sleep(15)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             page.click(confirm_button_xpath)
+            print("run")
             time.sleep(3)
             print("项目运行中...")
             page.goto("https://www.kaggle.com/",timeout=900000)  # 返回主页准备退出登录

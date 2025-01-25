@@ -102,7 +102,7 @@ def start_instance(email, password):
                 print("版本已创建")
             else:
                 save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
-                page.click(save_version,force=True,timeout=900000)
+                page.click(save_version,force=True)
             print("版本已创建")
 
             time.sleep(15)

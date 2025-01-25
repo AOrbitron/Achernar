@@ -83,7 +83,7 @@ def start_instance(email, password):
                     clicked = True
                     break
                 except Exception as e:
-                    print(f"尝试点击 {edit_button} 失败: {e}")
+                    print(f"尝试点击 {edit_button} 失败: 尝试使用其他xpath路径定位")
             print("等待页面加载完成")
             time.sleep(25)
             page.evaluate("""
@@ -111,7 +111,7 @@ def start_instance(email, password):
                     clicked = True
                     break
                 except Exception as e:
-                    print(f"尝试点击 {save_version_button} 失败: {e}")
+                    print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
             time.sleep(15)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             page.click(confirm_button_xpath)

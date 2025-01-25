@@ -65,29 +65,27 @@ def start_instance(email, password):
             page.goto(data["shared_notebook"],timeout=900000)  # 替换成目标页面的URL
             print("尝试运行项目")
 
-            # 等待并点击编辑按钮
-            edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
-
-            if page.is_visible(edit_button_xpath):
-                page.click(edit_button_xpath)
-            print("已进入项目页")
-
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
-            edit_b='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'
-            if page.is_visible(edit_b):
-                page.click(edit_b)
-                print("已进入编辑页")
-            edit_c='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button'
-            if page.is_visible(edit_c):
-                page.click(edit_c)
-                print("已进入编辑页")
-            edit_d='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
-            if page.is_visible(edit_d):
-                page.click(edit_d)
-                print("已进入编辑页")
-            print("等待页面加载完成(30秒)")
-            time.sleep(33)
+            edit_buttons = [
+                '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',
+                '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button',
+                '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
+            ]
+
+            clicked = False
+            for edit_button in edit_buttons:
+                try:
+                    page.wait_for_selector(edit_button, state="visible",
+                                           timeout=30000)  # 使用wait_for_selector替换is_visable
+                    page.click(edit_button)
+                    print("已进入编辑页")
+                    clicked = True
+                    break
+                except Exception as e:
+                    print(f"尝试点击 {edit_button} 失败: {e}")
+            print("等待页面加载完成")
+            time.sleep(25)
             page.evaluate("""
                 () => {
                     const blocker1 = document.querySelector('.sc-ftmehX.clyupM');
@@ -96,15 +94,24 @@ def start_instance(email, password):
                     if (blocker2) blocker2.style.pointerEvents = 'none';
                 }
             """)
-            save_version1= '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
-            if page.is_visible(save_version1):
-                page.click(save_version1)
-                print("版本已创建")
-            else:
-                save_version=  '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button'
-                page.click(save_version,force=True)
-            print("版本已创建")
 
+            edit_buttons = [
+                '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
+                '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
+                '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
+            ]
+
+            clicked = False
+            for edit_button in edit_buttons:
+                try:
+                    page.wait_for_selector(edit_button, state="visible",
+                                           timeout=30000)  # 使用wait_for_selector替换is_visable
+                    page.click(edit_button)
+                    print("已进入编辑页")
+                    clicked = True
+                    break
+                except Exception as e:
+                    print(f"尝试点击 {edit_button} 失败: {e}")
             time.sleep(15)
             confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
             page.click(confirm_button_xpath)

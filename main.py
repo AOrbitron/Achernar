@@ -67,10 +67,10 @@ def start_instance(email, password):
 
             # 等待并点击编辑按钮
             edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
-
+            time.sleep(10)
             if page.is_visible(edit_button_xpath):
                 page.click(edit_button_xpath)
-            print("已进入项目页")
+                print("已进入项目页")
 
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成

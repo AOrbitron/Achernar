@@ -65,6 +65,13 @@ def start_instance(email, password):
             page.goto(data["shared_notebook"],timeout=900000)  # 替换成目标页面的URL
             print("尝试运行项目")
 
+            # 等待并点击编辑按钮
+            edit_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
+
+            if page.is_visible(edit_button_xpath):
+                page.click(edit_button_xpath)
+            print("已进入项目页")
+
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
             edit_b='//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button'

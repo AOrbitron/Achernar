@@ -1,6 +1,6 @@
 
 # Achernar
-[Achernar命名的由来](https://www.star-facts.com/achernar/)
+[Eridanus](https://github.com/avilliai/Eridanus)衍生项目。
 # 简介
 - 1.自动运行kaggle脚本，在运行一定时长后自动切换账号并重新运行脚本。
 - 2.使用cpolar/其他frp服务让脚本提供的api暴露给外部调用

@@ -19,7 +19,7 @@ git clone --depth 1 https://mirror.ghproxy.com/https://github.com/avilliai/Acher
 其他镜像源(推荐)  
 git clone --depth 1 https://github.moeyy.xyz/https://github.com/avilliai/Achernar
 ```
-不会用git自己看[avilliai/Achernar: kaggle账号自动切换+运行项目/cpolar隧道本地反向代理](https://github.com/avilliai/Achernar)有个绿色按钮，点了下载zip压缩包。
+不会用git自己看右上角有个绿色按钮，点了下载zip压缩包。
 ## 安装python
 [安装python3.11](https://mirrors.huaweicloud.com/python/3.11.0/python-3.11.0-amd64.exe)
 

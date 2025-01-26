@@ -7,8 +7,7 @@
 - 3.使用flask在本地作为反向代理，自动刷新cpolar隧道链接。
 
 [教程](https://eridanus-doc.netlify.app/docs/lessons/kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB)
-# 部署 
-# 部署Achernar  
+# 部署  
 [Achernar](https://github.com/avilliai/Achernar)  
   
 ## 拉取项目源码

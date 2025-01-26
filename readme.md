@@ -47,7 +47,7 @@ cpolar:                  #使用frp不用填
   email: "cpolar的邮箱"  
   password: "cpolar的密码"  
 ```  
-**运行Achernar主程序**  
+**运行Achernar主程序/启动脚本.bat**  
   
 (建议开启代理，并设置为pac模式/规则代理模式，将有助于稳定运行。)  
 # 鸣谢

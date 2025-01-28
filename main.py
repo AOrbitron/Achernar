@@ -135,7 +135,7 @@ def start_instance(email, password):
                 except Exception as e:
                     print(f"尝试点击 {confirm_button} 失败: 尝试使用其他xpath路径定位")
             print("run")
-            time.sleep(30000000)
+            time.sleep(5)
             print("项目运行中...")
             page.goto("https://www.kaggle.com/",timeout=900000)  # 返回主页准备退出登录
 

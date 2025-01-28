@@ -113,7 +113,17 @@ def start_instance(email, password):
             time.sleep(15)
             confirm_buttions=[
                 '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
+                "body > div.MuiDrawer-root.MuiDrawer-modal.sc-jwaPLR.kcIYKu.sc-gFtjaa.cRLid.MuiModal-root.css-y28f86 > div.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation16.MuiDrawer-paper.MuiDrawer-paperAnchorRight.css-1oxs6cd > div > div > div.sc-kEsJEW.ewbGmO.sc-fqujGp.eXNRh > div.sc-iRVXky.dsKjnL > button.sc-edmcci.bBPuEg",
+                '//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
                 '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
+                "//button[@title='Save' and contains(@class, 'bBPuEg')]",  # 方案 1：利用 title 和 class 属性 (最优)
+                "//button[contains(@class, 'bBPuEg')]",  # 方案 1 简化版：如果 bBPuEg 足够独特
+                "//button[contains(., 'Save')]",  # 方案 2：利用文本内容
+                "//div[contains(@class, 'dsKjnL')]/button[contains(., 'Save')]",  # 方案 3：利用父元素的 class 属性
+                "button[title='Save'].bBPuEg",  # 方案 4：CSS 选择器
+                "button.bBPuEg",  # 方案 4 简化版：如果 bBPuEg 足够独特
+                "button:has-text('Save')",  # 方案4 利用文本内容
+                # 你提供的 CSS selector
             ]
             for confirm_button in confirm_buttions:
                 try:
@@ -124,16 +134,8 @@ def start_instance(email, password):
                     break
                 except Exception as e:
                     print(f"尝试点击 {confirm_button} 失败: 尝试使用其他xpath路径定位")
-                    try:
-                        save_button = page.locator("//button[contains(., 'Save')]")
-
-                        save_button.click()
-                        print("已保存版本")
-                        break
-                    except Exception as e:
-                        pass
             print("run")
-            time.sleep(3)
+            time.sleep(30000000)
             print("项目运行中...")
             page.goto("https://www.kaggle.com/",timeout=900000)  # 返回主页准备退出登录
 

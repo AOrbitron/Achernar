@@ -101,20 +101,29 @@ def start_instance(email, password):
                 '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
             ]
 
-            clicked = False
             for save_version_button in save_version_buttons:
                 try:
                     page.wait_for_selector(save_version_button, state="visible",
                                            timeout=30000)  # 使用wait_for_selector替换is_visable
                     page.click(save_version_button)
                     print("已保存版本")
-                    clicked = True
                     break
                 except Exception as e:
                     print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
             time.sleep(15)
-            confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]'
-            page.click(confirm_button_xpath)
+            confirm_buttions=[
+                '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
+                '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]'
+            ]
+            for confirm_button in confirm_buttions:
+                try:
+                    page.wait_for_selector(confirm_button, state="visible",
+                                           timeout=30000)  # 使用wait_for_selector替换is_visable
+                    page.click(confirm_button)
+                    print("已确认运行")
+                    break
+                except Exception as e:
+                    print(f"尝试点击 {confirm_button} 失败: 尝试使用其他xpath路径定位")
             print("run")
             time.sleep(3)
             print("项目运行中...")

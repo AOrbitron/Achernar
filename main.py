@@ -113,7 +113,7 @@ def start_instance(email, password):
             time.sleep(15)
             confirm_buttions=[
                 '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
-                '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]'
+                '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
             ]
             for confirm_button in confirm_buttions:
                 try:
@@ -124,6 +124,14 @@ def start_instance(email, password):
                     break
                 except Exception as e:
                     print(f"尝试点击 {confirm_button} 失败: 尝试使用其他xpath路径定位")
+                    try:
+                        save_button = page.locator("//button[contains(., 'Save')]")
+
+                        save_button.click()
+                        print("已保存版本")
+                        break
+                    except Exception as e:
+                        pass
             print("run")
             time.sleep(3)
             print("项目运行中...")

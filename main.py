@@ -83,7 +83,8 @@ def start_instance(email, password):
                 except Exception as e:
                     print(f"尝试点击 {edit_button} 失败: 尝试使用其他xpath路径定位")
             print("等待页面加载完成")
-            page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
+            button = page.wait_for_selector("button:has-text('Markdown'), button:has-text('Code')", state="visible", timeout=120000)
+
 
             save_version_buttons = [
                 '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',

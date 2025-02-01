@@ -73,44 +73,35 @@ def start_instance(email, password):
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
             ]
 
-            clicked = False
             for edit_button in edit_buttons:
                 try:
                     page.wait_for_selector(edit_button, state="visible",
                                            timeout=30000)  # 使用wait_for_selector替换is_visable
                     page.click(edit_button)
                     print("已进入编辑页")
-                    clicked = True
                     break
                 except Exception as e:
                     print(f"尝试点击 {edit_button} 失败: 尝试使用其他xpath路径定位")
             print("等待页面加载完成")
-            time.sleep(25)
-            page.evaluate("""
-                () => {
-                    const blocker1 = document.querySelector('.sc-ftmehX.clyupM');
-                    const blocker2 = document.querySelector('.MuiBackdrop-root');
-                    if (blocker1) blocker1.style.pointerEvents = 'none';
-                    if (blocker2) blocker2.style.pointerEvents = 'none';
-                }
-            """)
+            page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
 
             save_version_buttons = [
                 '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
                 '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
-                '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button'
+                '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
+                '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
             ]
-
-            for save_version_button in save_version_buttons:
-                try:
-                    page.wait_for_selector(save_version_button, state="visible",
-                                           timeout=30000)  # 使用wait_for_selector替换is_visable
-                    page.click(save_version_button)
-                    print("已保存版本")
-                    break
-                except Exception as e:
-                    print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
-            time.sleep(15)
+            if not save_version(page):
+                for save_version_button in save_version_buttons:
+                    try:
+                        page.wait_for_selector(save_version_button, state="visible",
+                                               timeout=30000)  # 使用wait_for_selector替换is_visable
+                        page.click(save_version_button)
+                        print("已保存版本")
+                        break
+                    except Exception as e:
+                        print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
+            time.sleep(10)
             confirm_buttions=[
                 '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
                 '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]'
@@ -119,14 +110,8 @@ def start_instance(email, password):
                 "button:has-text('Save')",  # 方案4 利用文本内容
                 "/html/body/div[contains(@class,'MuiDrawer-root') and contains(@class,'MuiDrawer-modal')]/div[contains(@class,'MuiDrawer-paper')]/div/div/div[last()]/div[last()]/button[last()]",
             ]
-            try_buttons=True
-            try:
-                page.get_by_role("button", name="Save").click(timeout=40000)
-                print("已确认运行 (使用 get_by_role)")
-                try_buttons=False
-            except Exception as e:
-                print(f"尝试使用 get_by_role 点击失败: {e}")
-            if try_buttons:
+
+            if not save(page):
                 for confirm_button in confirm_buttions:
                     try:
                         page.wait_for_selector(confirm_button, state="visible",
@@ -170,11 +155,11 @@ def start_instance(email, password):
             time.sleep(1.5)
 
 
-
     except Exception as e:
         print(f"\033[91m任务失败：{str(e)}\033[0m")
           # 等待10秒后重试
     finally:
+
         if browser:
             print("任务完成，浏览器将关闭")
             try:
@@ -182,50 +167,67 @@ def start_instance(email, password):
             except Exception as e:
                 print(f"{str(e)}")
 
-def kill_instance(email, password):
+def save_version(page):
     try:
-        # 使用 Playwright 启动浏览器
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=data["headless"], args=["--no-sandbox", "--disable-dev-shm-usage"])
-            context = browser.new_context()
-
-            # 打开新的页面
-            page = context.new_page()
-
-
-            # 访问登录页面
-            page.goto("https://www.kaggle.com/account/login")
-            print(f"尝试登录账户 {email}")
-
-            # 等待并填写登录信息
-            login_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div/div[1]/button[2]'
-            page.click(login_button_xpath)
-            page.fill('//*[@id=":r0:"]', email)  # 填写邮箱
-            page.fill('//*[@id=":r1:"]', password)  # 填写密码
-            page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单
-
-            print("登录信息已提交。")
-            time.sleep(10)  # 等待登录完成
-            view_events='//*[@id="site-container"]/div/div[3]/div[3]/div[2]/button/div/span'
-
-            page.click(view_events)
-            time.sleep(10)
-            gotit='//*[@id="site-content"]/div[1]/div/div[2]/div'
-            if page.is_visible(gotit):
-                page.click(gotit)
-            select_button='//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/ul[1]/li/div/div/div/button'
-            page.click(select_button)
-            stop_button='//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/ul/li[2]'
-            page.click(stop_button)
-            print("实例已停止")
-            page.goto("https://www.kaggle.com/")  # 返回主页准备退出登录
-            account_button_xpath = '//*[@id="site-container"]/div/div[4]/div[2]/div[2]/div/div/div/div'
-            confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/ul[2]/div/li'
-            page.click(account_button_xpath)
-            time.sleep(1.5)
-            page.click(confirm_button_xpath)
+        # 推荐方法：使用 get_by_role 和 title
+        page.get_by_role("button", name="Save Version").click(timeout=30000)
+        print("已点击 Save Version 按钮 (使用 get_by_role 和 title)")
+        return True
     except Exception as e:
-        print(f"\033[91m失败：{str(e)}\033[0m")
+        print(f"点击 Save Version 按钮失败: {e}")
+        # 其他备选方案 (可选)
+        try:
+            page.get_by_title("Save Version").click(timeout=30000)
+            print("已点击 Save Version 按钮 (使用 get_by_title)")
+            return True
+        except Exception as e:
+            print(f"点击 Save Version 按钮失败: {e}")
+
+        try:
+            page.get_by_label("Save Version").click(timeout=30000)
+            print("已点击 Save Version 按钮 (使用 get_by_label)")
+            return True
+        except Exception as e:
+            print(f"点击 Save Version 按钮失败: {e}")
+
+        try:
+            page.locator("//button[@title='Save Version']").click(timeout=30000)
+            print("已点击 Save Version 按钮 (使用 XPath)")
+            return True
+        except Exception as e:
+            print(f"点击 Save Version 按钮失败: {e}")
+        return False
+def save(page):
+    try:
+        # 推荐方法：使用 get_by_role 和 name
+        page.get_by_role("button", name="Save").click(timeout=30000)
+        print("已点击 Save 按钮 (使用 get_by_role 和 name)")
+        return True
+    except Exception as e:
+        print(f"点击 Save 按钮失败: {e}")
+
+        # 其他备选方案 (可选)
+        try:
+            page.get_by_text("Save").click()
+            print("已点击 Save 按钮 (使用 get_by_text)")
+            return True
+        except Exception as e:
+            print(f"点击 Save 按钮失败: {e}")
+
+        try:
+            page.locator("button:has-text('Save')").click(timeout=30000)
+            print("已点击 Save 按钮 (使用 CSS 选择器)")
+            return True
+        except Exception as e:
+            print(f"点击 Save 按钮失败: {e}")
+
+        try:
+            page.locator("//button[contains(., 'Save')]").click(timeout=30000)
+            print("已点击 Save 按钮 (使用 XPath)")
+            return True
+        except Exception as e:
+            print(f"点击 Save 按钮失败: {e}")
+        return False
 
 
 def main():

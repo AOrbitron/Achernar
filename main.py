@@ -92,7 +92,7 @@ def start_instance(email, password):
                 '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
                 '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
             ]
-            time.sleep(8)
+            time.sleep(7)
             if not save_version(page):
                 for save_version_button in save_version_buttons:
                     try:

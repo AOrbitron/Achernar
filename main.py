@@ -92,6 +92,7 @@ def start_instance(email, password):
                 '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
                 '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
             ]
+            time.sleep(8)
             if not save_version(page):
                 for save_version_button in save_version_buttons:
                     try:
@@ -102,7 +103,7 @@ def start_instance(email, password):
                         break
                     except Exception as e:
                         print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
-            time.sleep(10)
+            time.sleep(8)
             confirm_buttions=[
                 '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
                 '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]'

@@ -59,7 +59,7 @@ def start_instance(email, password):
             page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单
 
             print("登录信息已提交。")
-            time.sleep(10)  # 等待登录完成
+            time.sleep(8)  # 等待登录完成
 
             # 访问目标页面
             page.goto(data["shared_notebook"],timeout=900000)  # 替换成目标页面的URL
@@ -83,7 +83,7 @@ def start_instance(email, password):
                 except Exception as e:
                     print(f"尝试点击 {edit_button} 失败: 尝试使用其他xpath路径定位")
             print("等待页面加载完成")
-            button = page.wait_for_selector("button:has-text('Markdown'), button:has-text('Code')", state="visible", timeout=120000)
+            page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
 
 
             save_version_buttons = [

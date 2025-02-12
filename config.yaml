@@ -5,7 +5,8 @@ headless: true   #是否开启浏览器无头模式，低配服务器建议开�
 #在shared_notebook填入记录的你的【分享链接】
 shared_notebook: ""
 enable_kaggle_extension: true
-enable_cpolar_extension: true
+enable_cpolar_extension: fals
+enable_get_dynamic_ip: true   #你一般用不到，这是个人提供的frp服务。
 cpolar_check_interval: 180
 kaggle_change_account_interval: 43050
 
@@ -17,3 +18,7 @@ kaggle_accounts:
 cpolar:
   email: "cpolar的邮箱"
   password: "cpolar的密码"
+get_dynamic_ip:   #通过url获取动态ip
+  url: ""
+  port1: 11111
+  port2: 22222

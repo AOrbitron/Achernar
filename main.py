@@ -347,7 +347,39 @@ def cpolar_main():
         time.sleep(data['cpolar_check_interval'])
 def schedule_cpolar_main(): #cpolar定时任务
     cpolar_main()
+def get_dynamic_ip():
+    global tunnel_url
+    get_ip_url=data["get_dynamic_ip"]["url"]
 
+    def fetch_info_from_website():
+        """ 获取隧道信息，返回最新的 tunnel_url """
+        try:
+            response = requests.get(get_ip_url)
+            ip_address=response.text
+            tunnels=[f"https://{ip_address}:{data['get_dynamic_ip']['port1']}",f"https://{ip_address}:{data['get_dynamic_ip']['port2']}"]
+            return tunnels
+        except Exception as e:
+            print(f"获取隧道信息失败：{str(e)}")
+            return None
+
+
+
+    while True:
+        # 定时刷新获取隧道 URL
+        new_tunnel_url = fetch_info_from_website()
+
+        if new_tunnel_url != None and new_tunnel_url != []:
+            tunnel_url = new_tunnel_url
+            print(f"最新隧道信息: {tunnel_url}")
+        else:
+            print("获取隧道信息失败")
+            new_tunnel_url = fetch_info_from_website()
+            if new_tunnel_url != [] and new_tunnel_url != None:
+                tunnel_url = new_tunnel_url
+                print(f"最新隧道信息: {tunnel_url}")
+
+        # 等待一段时间后再次获取
+        time.sleep(data['cpolar_check_interval'])
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 def proxy_request(path):
@@ -416,5 +448,7 @@ if __name__ == "__main__":
         threading.Thread(target=schedule_cpolar_main, daemon=True).start()
     if data["enable_kaggle_extension"]:
         threading.Thread(target=main, daemon=True).start()
+    if data["enable_get_dynamic_ip"]:
+        threading.Thread(target=get_dynamic_ip, daemon=True).start()
 
     app.run(host='0.0.0.0', port=data['port'])

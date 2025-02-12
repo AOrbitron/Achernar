@@ -6,7 +6,7 @@ headless: true   #是否开启浏览器无头模式，低配服务器建议开�
 shared_notebook: ""
 enable_kaggle_extension: true
 enable_cpolar_extension: true
-enable_get_dynamic_ip: false   #你一般用不到，这是个人提供的frp服务。
+enable_get_dynamic_ip: false   #你一般用不到，这是个人提供的frp服务。不可与cpolar同时开启
 cpolar_check_interval: 180
 kaggle_change_account_interval: 43050
 

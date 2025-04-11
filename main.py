@@ -68,7 +68,7 @@ def start_instance(email, password):
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
             edit_buttons = [
-                '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/button'
+                '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/button',
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button',
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'

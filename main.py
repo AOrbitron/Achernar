@@ -180,36 +180,27 @@ def start_instance(email, password):
                 browser.close()
             except Exception as e:
                 print(f"{str(e)}")
-def find_and_click(page,text):
-    try:
-        # 推荐方法：使用 get_by_role 和 title
-        page.get_by_role("button", name=text).click(timeout=30000)
-        print(f"已点击 {text} 按钮")
-        return True
-    except Exception as e:
-        print(f"点击 {text} 按钮失败: {e}")
-        # 其他备选方案 (可选)
-        try:
-            page.get_by_title(text).click(timeout=30000)
-            print(f"已点击 {text} 按钮")
-            return True
-        except Exception as e:
-            print(f"点击 {text} 按钮失败: {e}")
+def find_and_click(page, text, timeout=30000):
+    locators = [
+        lambda: page.get_by_role("button", name=text),
+        lambda: page.get_by_title(text),
+        lambda: page.get_by_label(text),
+        lambda: page.locator(f"//button[@title='{text}']"),
+        lambda: page.locator(f"//button[text()='{text}']"),
+        lambda: page.locator(f"text={text}")  # 最后兜底方案
+    ]
 
+    for locator_func in locators:
         try:
-            page.get_by_label(text).click(timeout=30000)
+            locator = locator_func()
+            locator.click(timeout=timeout)
             print(f"已点击 {text} 按钮")
             return True
         except Exception as e:
-            print(f"点击 {text} 按钮失败: {e}")
+            continue  # 忽略当前方法的错误，尝试下一个
+    print(f"点击 {text} 按钮失败：所有方法均尝试失败")
+    return False
 
-        try:
-            page.locator(f"//button[@title='{text}']").click(timeout=30000)
-            print(f"已点击 {text} 按钮")
-            return True
-        except Exception as e:
-            print(f"点击 {text} 按钮失败: {e}")
-        return False
 def save_version(page):
     try:
         # 推荐方法：使用 get_by_role 和 title

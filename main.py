@@ -12,7 +12,8 @@ import requests
 import platform
 
 from playwright.sync_api import sync_playwright
-
+import re
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 # 加载账户信息
 
 with open('config.yaml', 'r', encoding='utf-8') as f:
@@ -181,24 +182,35 @@ def start_instance(email, password):
             except Exception as e:
                 print(f"{str(e)}")
 def find_and_click(page, text, timeout=30000):
-    locators = [
+    """
+    在页面中查找任意包含指定文本的元素并点击。
+    """
+
+    strategies = [
         lambda: page.get_by_role("button", name=text),
         lambda: page.get_by_title(text),
         lambda: page.get_by_label(text),
         lambda: page.locator(f"//button[@title='{text}']"),
         lambda: page.locator(f"//button[text()='{text}']"),
-        lambda: page.locator(f"text={text}")  # 最后兜底方案
+        lambda: page.locator(f"text=\"{text}\""),
+        lambda: page.locator(f"//*[contains(text(), '{text}')]"),  # 通用查找
     ]
 
-    for locator_func in locators:
+    for strategy in strategies:
         try:
-            locator = locator_func()
-            locator.click(timeout=timeout)
-            print(f"已点击 {text} 按钮")
+            locator = strategy()
+            if locator.count() == 0:
+                continue
+            locator.first.click(timeout=timeout)
+            print(f"已点击包含文本 “{text}” 的元素")
             return True
+        except PlaywrightTimeoutError:
+            print(f"error：无法点击包含文本 “{text}” {e}")
+            continue
         except Exception as e:
-            continue  # 忽略当前方法的错误，尝试下一个
-    print(f"点击 {text} 按钮失败：所有方法均尝试失败")
+            continue
+
+    print(f"❌ 无法点击文本 “{text}”，未找到匹配元素")
     return False
 
 def save_version(page):

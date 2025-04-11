@@ -68,13 +68,12 @@ def start_instance(email, password):
 
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
-            edit_buttons = [
+            '''edit_buttons = [
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/button',
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/span/a/button',
                 '//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/div[2]/div/span/a/button'
             ]
-
             for edit_button in edit_buttons:
                 try:
                     page.wait_for_selector(edit_button, state="visible",
@@ -83,18 +82,22 @@ def start_instance(email, password):
                     print("已进入编辑页")
                     break
                 except Exception as e:
-                    print(f"尝试点击 {edit_button} 失败: 尝试使用其他xpath路径定位")
-            print("kaggle要求二次点击，选择")
-            if not find_and_click(page,"Edit in Kaggle Notebooks"):
-                twice_buttons=["/html/body/div[3]/div[3]/li[1]/div"]
-                for twi in twice_buttons:
-                    try:
-                        page.wait_for_selector(twi, state="visible", timeout=30000)  # 使用wait_for_selector替换is_visable
-                        page.click(save_version_button)
-                        print("已选择kaggle")
-                        break
-                    except Exception as e:
-                        print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
+                    print(f"尝试点击 {edit_button} 失败: 尝试使用其他xpath路径定位")'''
+            if find_and_click(page,"Copy & Edit"):
+                print("kaggle要求二次点击，点击Edit in Kaggle Notebooks")
+                if not find_and_click(page,"Edit in Kaggle Notebooks"):
+                    twice_buttons=["/html/body/div[3]/div[3]/li[1]/div"]
+                    for twi in twice_buttons:
+                        try:
+                            page.wait_for_selector(twi, state="visible", timeout=30000)  # 使用wait_for_selector替换is_visable
+                            page.click(save_version_button)
+                            print("已选择kaggle")
+                            break
+                        except Exception as e:
+                            print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
+            else:
+                find_and_click(page,"Edit My Copy")
+
             print("等待页面加载完成")
             page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
 

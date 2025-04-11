@@ -83,6 +83,17 @@ def start_instance(email, password):
                     break
                 except Exception as e:
                     print(f"尝试点击 {edit_button} 失败: 尝试使用其他xpath路径定位")
+            print("kaggle要求二次点击，选择")
+            if not find_and_click(page,"Edit in Kaggle Notebooks"):
+                twice_buttons=["/html/body/div[3]/div[3]/li[1]/div"]
+                for twi in twice_buttons:
+                    try:
+                        page.wait_for_selector(twi, state="visible", timeout=30000)  # 使用wait_for_selector替换is_visable
+                        page.click(save_version_button)
+                        print("已选择kaggle")
+                        break
+                    except Exception as e:
+                        print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
             print("等待页面加载完成")
             page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
 
@@ -169,7 +180,36 @@ def start_instance(email, password):
                 browser.close()
             except Exception as e:
                 print(f"{str(e)}")
+def find_and_click(page,text):
+    try:
+        # 推荐方法：使用 get_by_role 和 title
+        page.get_by_role("button", name=text).click(timeout=30000)
+        print(f"已点击 {text} 按钮")
+        return True
+    except Exception as e:
+        print(f"点击 {text} 按钮失败: {e}")
+        # 其他备选方案 (可选)
+        try:
+            page.get_by_title(text).click(timeout=30000)
+            print(f"已点击 {text} 按钮")
+            return True
+        except Exception as e:
+            print(f"点击 {text} 按钮失败: {e}")
 
+        try:
+            page.get_by_label(text).click(timeout=30000)
+            print(f"已点击 {text} 按钮")
+            return True
+        except Exception as e:
+            print(f"点击 {text} 按钮失败: {e}")
+
+        try:
+            page.locator(f"//button[@title='{text}']").click(timeout=30000)
+            print(f"已点击 {text} 按钮")
+            return True
+        except Exception as e:
+            print(f"点击 {text} 按钮失败: {e}")
+        return False
 def save_version(page):
     try:
         # 推荐方法：使用 get_by_role 和 title

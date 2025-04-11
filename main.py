@@ -84,8 +84,8 @@ def start_instance(email, password):
                 if find_and_click(page,"Edit My Copy"):
                     pass
                 else:
-                    page.wait_for_selector("//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button", state="visible", timeout=30000)  # 使用wait_for_selector替换is_visable
-                    page.click("//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button")
+                    page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button', state="visible", timeout=30000)  
+                    page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
                     
                     #find_and_click(page,"Edit")
             print("等待页面加载完成")

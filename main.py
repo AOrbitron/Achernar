@@ -75,7 +75,7 @@ def start_instance(email, password):
                     for twi in twice_buttons:
                         try:
                             page.wait_for_selector(twi, state="visible", timeout=30000)  # 使用wait_for_selector替换is_visable
-                            page.click(save_version_button)
+                            page.click(twi)
                             print("已选择kaggle")
                             break
                         except Exception as e:
@@ -84,7 +84,10 @@ def start_instance(email, password):
                 if find_and_click(page,"Edit My Copy"):
                     pass
                 else:
-                    find_and_click(page,"Edit")
+                    page.wait_for_selector("//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button", state="visible", timeout=30000)  # 使用wait_for_selector替换is_visable
+                    page.click("//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button")
+                    
+                    #find_and_click(page,"Edit")
             print("等待页面加载完成")
             page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
 

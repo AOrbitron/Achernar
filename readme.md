@@ -53,6 +53,13 @@ cpolar:                  #使用frp不用填
 如遇连接失败
 - 1.确保kaggle脚本已运行
 - 2.开启规则代理，将cpolar/frp域名连接规则设置为直连。如使用cpolar，由于二级域名不固定，建议用域名keywords即cpolar关键字匹配
-)  
+
+以clash配置文件为例，为规则代理添加以下两条规则
+'''
+rules:
+  - DOMAIN-KEYWORD,cpolar,DIRECT
+  - DOMAIN-KEYWORD,frp,DIRECT
+'''
+)
 # 鸣谢
 [spawner](https://github.com/spawner1145) 提供了Achernar的账号切换脚本原型，以及编写了优秀的kaggle脚本。

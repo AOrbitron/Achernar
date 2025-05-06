@@ -3,7 +3,7 @@
 [Eridanus](https://github.com/avilliai/Eridanus)衍生项目。
 # 简介
 - 1.自动运行kaggle脚本，在运行一定时长后自动切换账号并重新运行脚本。
-- 2.使用flask在本地作为反向代理，自动刷新cpolar隧道链接。(使用frp用不到这个。)
+- 2.使用flask在本地作为反向代理，自动刷新cpolar隧道链接。(使用frp固定节点时用不到这个。)
 # 部署  
 [示例：部署ai绘画服务](https://eridanus-doc.netlify.app/docs/lessons/kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB)
   

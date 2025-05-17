@@ -90,25 +90,26 @@ def start_instance(email, password):
                     #find_and_click(page,"Edit")
             print("等待页面加载完成")
             page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
-
-
-            save_version_buttons = [
-                '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
-                '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
-                '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
-                '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
-            ]
-            time.sleep(7)
-            if not save_version(page):
-                for save_version_button in save_version_buttons:
-                    try:
-                        page.wait_for_selector(save_version_button, state="visible",
-                                               timeout=30000)  # 使用wait_for_selector替换is_visable
-                        page.click(save_version_button)
-                        print("已保存版本")
-                        break
-                    except Exception as e:
-                        print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
+            if not find_and_click(page,"Save Version"):
+                print("Save Version通用点击方案失效，采用原始方案")
+                save_version_buttons = [
+                    '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
+                    '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
+                    '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
+                    '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
+                ]
+                time.sleep(7)
+                if not save_version(page):
+                    for save_version_button in save_version_buttons:
+                        try:
+                            page.wait_for_selector(save_version_button, state="visible",
+                                                   timeout=30000)  # 使用wait_for_selector替换is_visable
+                            page.click(save_version_button)
+                            print("已保存版本")
+                            break
+                        except Exception as e:
+                            print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
+            
             time.sleep(8)
             confirm_buttions=[
                 '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',

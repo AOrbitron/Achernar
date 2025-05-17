@@ -2,10 +2,10 @@
 # Achernar
 [Eridanus](https://github.com/avilliai/Eridanus)衍生项目。
 # 简介
-- 1.自动运行kaggle脚本，在运行一定时长后自动切换账号并重新运行脚本。
+- 1.自动运行公开kaggle脚本，在运行一定时长后自动切换账号并重新运行脚本。
 - 2.使用flask在本地作为反向代理，自动刷新cpolar隧道链接。(使用frp固定节点时用不到这个。)
 # 部署  
-[示例：部署ai绘画服务](https://eridanus-doc.netlify.app/docs/lessons/kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB)
+[示例：部署ai绘画服务](https://eridanus.netlify.app/configuration/ai%E7%BB%98%E7%94%BB/kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB.html)
   
 ## 拉取项目源码
 ```
@@ -61,5 +61,7 @@ rules:
   - DOMAIN-KEYWORD,frp,DIRECT
 ```
 )
+# 注意
+同一脚本如果save version次数过多，打开时会非常卡顿，将影响achernar正常工作。建议在save version超过30后更换新的shared_notebook链接。
 # 鸣谢
 [spawner](https://github.com/spawner1145) 提供了Achernar的账号切换脚本原型，以及编写了优秀的kaggle脚本。

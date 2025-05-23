@@ -135,38 +135,16 @@ def start_instance(email, password):
             print("项目运行中...")
             page.goto("https://www.kaggle.com/",timeout=900000)  # 返回主页准备退出登录
 
-            # 退出登录
-            time.sleep(5)
-            abx='//*[@id="site-container"]/div/div[3]/div[2]/div[2]/div/div/div/div/svg'
-
-            avatar='//*[@id="site-container"]/div/div[3]/div[2]/div[2]/div/div/div/div/div'
-            account_button_xpath = '//*[@id="site-container"]/div/div[4]/div[2]/div[2]/div/div/div/div'
-            if page.is_visible(abx):
-                page.click(abx)
-                print("点击账户页面")
-            elif page.is_visible(account_button_xpath):
-                page.click(account_button_xpath)
-                print("点击账户页面")
-            elif page.is_visible(avatar):
-                page.click(avatar)
-                print("点击账户页面")
-            else:
-                print("未找到账户页面。不影响使用")
-                return
-            time.sleep(1.5)
-            confirm_button_xpath = '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/ul[2]/div/li'
-            confirm_button_xpath2= '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/ul[2]/div/li/div/a/div'
-            if page.is_visible(confirm_button_xpath2):
-                page.click(confirm_button_xpath2)
-            else:
-                page.click(confirm_button_xpath)
-
-            time.sleep(1.5)
 
 
     except Exception as e:
-        print(f"\033[91m任务失败：{str(e)}\033[0m")
-          # 等待10秒后重试
+        print(f"\033[91m任务失败：{str(e)}，重新尝试\033[0m")
+        if browser:
+            try:
+                browser.close()
+            except Exception as e:
+                print(f"{str(e)}")
+        start_instance(email, password)
     finally:
 
         if browser:

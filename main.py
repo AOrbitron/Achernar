@@ -1,16 +1,24 @@
+import os
+import random
 import threading
 import time
-from tomllib import load
 
-import requests
+import yaml
 from bs4 import BeautifulSoup
 from flask import Flask, jsonify, request, Response
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
+import requests
+import platform
+
 from playwright.sync_api import sync_playwright
+import re
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 # 加载账户信息
-with open('config.toml', 'rb') as f:
-    data = load(f)
+
+with open('config.yaml', 'r', encoding='utf-8') as f:
+    data = yaml.load(f.read(), Loader=yaml.FullLoader)
+
 app = Flask(__name__)
 
 # 全局变量，存储最新的隧道地址
@@ -28,7 +36,7 @@ def start_instance(email, password):
                 "args": ["--no-sandbox", "--disable-dev-shm-usage"]
             }
             proxy = data['proxy']
-            if proxy is not None and proxy != '' and proxy != "":  # 如果 proxy 不为空
+            if proxy != None and proxy != '' and proxy != "":  # 如果 proxy 不为空
                 launch_args["proxy"] = {
                     "server": proxy
                 }
@@ -72,7 +80,7 @@ def start_instance(email, password):
                             print("已选择kaggle")
                             break
                         except Exception as e:
-                            print(f"[{e}]尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
+                            print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
             else:
                 if find_and_click(page, "Edit My Copy"):
                     pass
@@ -81,7 +89,7 @@ def start_instance(email, password):
                                            state="visible", timeout=30000)
                     page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
 
-                    #find_and_click(page,"Edit")
+                    # find_and_click(page,"Edit")
             print("等待页面加载完成")
             page.wait_for_selector("button:has-text('Markdown')", state="visible", timeout=120000)
             if not find_and_click(page, "Save Version"):
@@ -259,10 +267,10 @@ def main():
             print(f"========== 开始第 {index} 次运行，使用账户：{email} ==========")
 
             start_instance(email, password)
-            #kill_instance(email, password)
+            # kill_instance(email, password)
             # 可选：在两次运行之间添加延时，避免过快执行
             time.sleep(data['kaggle_change_account_interval'])
-            #kill_instance(email, password)
+            # kill_instance(email, password)
             index += 1
             if index >= len(accounts):
                 index = 0
@@ -363,7 +371,7 @@ def cpolar_main():
         time.sleep(data['cpolar_check_interval'])
 
 
-def schedule_cpolar_main():  #cpolar定时任务
+def schedule_cpolar_main():  # cpolar定时任务
     cpolar_main()
 
 

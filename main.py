@@ -1,31 +1,23 @@
-import os
-import random
 import threading
 import time
-
-
-import yaml
-from bs4 import BeautifulSoup
-from flask import Flask, jsonify, request, Response
+from tomllib import load
 
 import requests
-import platform
-
-from playwright.sync_api import sync_playwright
-import re
+from bs4 import BeautifulSoup
+from flask import Flask, jsonify, request, Response
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import sync_playwright
+
 # 加载账户信息
-
-with open('config.yaml', 'r', encoding='utf-8') as f:
-    data = yaml.load(f.read(), Loader=yaml.FullLoader)
-
-
+with open('config.toml', 'rb') as f:
+    data = load(f)
 app = Flask(__name__)
 
 # 全局变量，存储最新的隧道地址
-tunnel_url=[]
+tunnel_url = []
 global url_index
 url_index = 0
+
 
 def start_instance(email, password):
     try:
@@ -36,7 +28,7 @@ def start_instance(email, password):
                 "args": ["--no-sandbox", "--disable-dev-shm-usage"]
             }
             proxy = data['proxy']
-            if proxy!=None and proxy!='' and proxy!="":  # 如果 proxy 不为空
+            if proxy is not None and proxy != '' and proxy != "":  # 如果 proxy 不为空
                 launch_args["proxy"] = {
                     "server": proxy
                 }
@@ -49,7 +41,7 @@ def start_instance(email, password):
             page = context.new_page()
 
             # 访问登录页面
-            page.goto("https://www.kaggle.com/account/login",timeout=900000)
+            page.goto("https://www.kaggle.com/account/login", timeout=900000)
             print(f"尝试登录账户 {email}")
 
             # 等待并填写登录信息
@@ -63,34 +55,36 @@ def start_instance(email, password):
             time.sleep(8)  # 等待登录完成
 
             # 访问目标页面
-            page.goto(data["shared_notebook"],timeout=900000)  # 替换成目标页面的URL
+            page.goto(data["shared_notebook"], timeout=900000)  # 替换成目标页面的URL
             print("尝试运行项目")
 
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
-            if find_and_click(page,"Copy & Edit"):
+            if find_and_click(page, "Copy & Edit"):
                 print("kaggle要求二次点击，点击Edit in Kaggle Notebooks")
-                if not find_and_click(page,"Edit in Kaggle Notebooks"):
-                    twice_buttons=["/html/body/div[3]/div[3]/li[1]/div"]
+                if not find_and_click(page, "Edit in Kaggle Notebooks"):
+                    twice_buttons = ["/html/body/div[3]/div[3]/li[1]/div"]
                     for twi in twice_buttons:
                         try:
-                            page.wait_for_selector(twi, state="visible", timeout=30000)  # 使用wait_for_selector替换is_visable
+                            page.wait_for_selector(twi, state="visible",
+                                                   timeout=30000)  # 使用wait_for_selector替换is_visable
                             page.click(twi)
                             print("已选择kaggle")
                             break
                         except Exception as e:
-                            print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
+                            print(f"[{e}]尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
             else:
-                if find_and_click(page,"Edit My Copy"):
+                if find_and_click(page, "Edit My Copy"):
                     pass
                 else:
-                    page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button', state="visible", timeout=30000)  
+                    page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',
+                                           state="visible", timeout=30000)
                     page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
-                    
+
                     #find_and_click(page,"Edit")
             print("等待页面加载完成")
-            page.wait_for_selector("button:has-text('Markdown')", state="visible",timeout=120000)
-            if not find_and_click(page,"Save Version"):
+            page.wait_for_selector("button:has-text('Markdown')", state="visible", timeout=120000)
+            if not find_and_click(page, "Save Version"):
                 print("Save Version通用点击方案失效，采用原始方案")
                 save_version_buttons = [
                     '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
@@ -109,9 +103,9 @@ def start_instance(email, password):
                             break
                         except Exception as e:
                             print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
-            
+
             time.sleep(8)
-            confirm_buttions=[
+            confirm_buttions = [
                 '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
                 '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]'
                 '//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
@@ -133,7 +127,7 @@ def start_instance(email, password):
             print("run")
             time.sleep(5)
             print("项目运行中...")
-            page.goto("https://www.kaggle.com/",timeout=900000)  # 返回主页准备退出登录
+            page.goto("https://www.kaggle.com/", timeout=900000)  # 返回主页准备退出登录
 
 
 
@@ -153,6 +147,8 @@ def start_instance(email, password):
                 browser.close()
             except Exception as e:
                 print(f"{str(e)}")
+
+
 def find_and_click(page, text, timeout=30000):
     """
     在页面中查找任意包含指定文本的元素并点击。
@@ -185,6 +181,7 @@ def find_and_click(page, text, timeout=30000):
     print(f"❌ 无法点击文本 “{text}”，未找到匹配元素")
     return False
 
+
 def save_version(page):
     try:
         # 推荐方法：使用 get_by_role 和 title
@@ -215,6 +212,8 @@ def save_version(page):
         except Exception as e:
             print(f"点击 Save Version 按钮失败: {e}")
         return False
+
+
 def save(page):
     try:
         # 推荐方法：使用 get_by_role 和 name
@@ -250,7 +249,7 @@ def save(page):
 
 def main():
     try:
-        index=0
+        index = 0
         accounts = data['kaggle_accounts']
         print(len(accounts))
         print("========== 启动完成 ==========")
@@ -312,7 +311,7 @@ def cpolar_main():
             response.raise_for_status()
 
             if response.status_code == 200:
-                tunnels=[]
+                tunnels = []
                 soup = BeautifulSoup(response.text, 'html.parser')
                 table_rows = soup.select("table tbody tr")
                 row = table_rows[-1] if table_rows else None
@@ -320,7 +319,7 @@ def cpolar_main():
                     columns = row.find_all("td")
                     if len(columns) > 0:
                         url_column = row.find("a")
-                        newurl=url_column['href'] if url_column else "N/A"
+                        newurl = url_column['href'] if url_column else "N/A"
                         tunnels.append(newurl.replace("http://", "https://"))
 
                 try:
@@ -338,13 +337,14 @@ def cpolar_main():
         except Exception as e:
             print(f"获取隧道信息失败：{str(e)}")
             return None
+
     login(session, login_url, credentials)
 
     while True:
         # 定时刷新获取隧道 URL
         new_tunnel_url = fetch_info_from_website(session, info_url)
 
-        if new_tunnel_url!=None and new_tunnel_url!=[]:
+        if new_tunnel_url != None and new_tunnel_url != []:
             tunnel_url = new_tunnel_url
             print(f"最新隧道信息: {tunnel_url}")
         else:
@@ -355,30 +355,33 @@ def cpolar_main():
                 time.sleep(data['cpolar_check_interval'])
                 continue
             new_tunnel_url = fetch_info_from_website(session, info_url)
-            if new_tunnel_url!=[] and new_tunnel_url!=None:
+            if new_tunnel_url != [] and new_tunnel_url != None:
                 tunnel_url = new_tunnel_url
                 print(f"最新隧道信息: {tunnel_url}")
 
         # 等待一段时间后再次获取
         time.sleep(data['cpolar_check_interval'])
-def schedule_cpolar_main(): #cpolar定时任务
+
+
+def schedule_cpolar_main():  #cpolar定时任务
     cpolar_main()
+
+
 def get_dynamic_ip():
     global tunnel_url
-    get_ip_url=data["get_dynamic_ip"]["url"]
+    get_ip_url = data["get_dynamic_ip"]["url"]
 
     def fetch_info_from_website():
         """ 获取隧道信息，返回最新的 tunnel_url """
         try:
             response = requests.get(get_ip_url)
-            ip_address=response.text
-            tunnels=[f"https://{ip_address}:{data['get_dynamic_ip']['port1']}",f"https://{ip_address}:{data['get_dynamic_ip']['port2']}"]
+            ip_address = response.text
+            tunnels = [f"https://{ip_address}:{data['get_dynamic_ip']['port1']}",
+                       f"https://{ip_address}:{data['get_dynamic_ip']['port2']}"]
             return tunnels
         except Exception as e:
             print(f"获取隧道信息失败：{str(e)}")
             return None
-
-
 
     while True:
         # 定时刷新获取隧道 URL
@@ -396,10 +399,12 @@ def get_dynamic_ip():
 
         # 等待一段时间后再次获取
         time.sleep(data['cpolar_check_interval'])
+
+
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 @app.route('/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
 def proxy_request(path):
-    global tunnel_url,url_index
+    global tunnel_url, url_index
     if not tunnel_url:
         return jsonify({"error": "隧道地址未初始化，请稍后再试"}), 503
 
@@ -411,8 +416,8 @@ def proxy_request(path):
             external_request = request.args.to_dict()
         else:
             external_request = request.get_json()
-        if len(tunnel_url)==1:
-            url_index=0
+        if len(tunnel_url) == 1:
+            url_index = 0
 
         current_url = tunnel_url[url_index]
         url_index = (url_index + 1) % len(tunnel_url)
@@ -424,17 +429,19 @@ def proxy_request(path):
         print(f"转发至新的隧道地址：{modified_tunnel_url}")
         if data['quest_proxy'] is not None and data['quest_proxy'] != '':
             proxy = data['quest_proxy']
-            proxies={"http": proxy, "https": proxy}
+            proxies = {"http": proxy, "https": proxy}
         else:
             proxies = None
         # 转发请求
         # 不要设置 Content-Type, 让 requests 自动处理
         headers = {key: value for key, value in request.headers.items() if key.lower() != 'host'}
 
-        response = requests.request(request.method, modified_tunnel_url, params=request.args if request.method == 'GET' else None,
+        response = requests.request(request.method, modified_tunnel_url,
+                                    params=request.args if request.method == 'GET' else None,
                                     json=external_request if request.method in ['POST', 'PUT', 'PATCH'] else None,
-                                    data=request.get_data() if request.method not in ['GET', 'POST', 'PUT', 'PATCH'] else None,
-                                    headers=headers, stream=True,proxies=proxies)
+                                    data=request.get_data() if request.method not in ['GET', 'POST', 'PUT',
+                                                                                      'PATCH'] else None,
+                                    headers=headers, stream=True, proxies=proxies)
 
         print(f"转发请求完成，响应状态码：{response.status_code}")
         # 打印原始响应头
@@ -454,9 +461,6 @@ def proxy_request(path):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-
 
 
 if __name__ == "__main__":

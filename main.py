@@ -55,8 +55,79 @@ def start_instance(email, password):
             # 等待并填写登录信息
             login_button_xpath = '//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div/div[1]/button[2]'
             page.click(login_button_xpath)
-            page.fill('//*[@id=":r0:"]', email)  # 填写邮箱
-            page.fill('//*[@id=":r1:"]', password)  # 填写密码
+
+            def fill_email_field(email_value):
+                selectors = [
+                    # 通过name属性定位
+                    'input[name="email"]',
+                    # 通过placeholder定位
+                    'input[placeholder*="email"]',
+                    'input[placeholder*="Email"]',
+                    'input[placeholder*="username"]',
+                    # 通过aria-label定位
+                    'input[aria-label*="email"]',
+                    'input[aria-label*="Email"]',
+                    # 通过type和autocomplete属性组合定位
+                    'input[type="text"][autocomplete="on"]',
+                    # 通过父元素的label文本定位
+                    'label:has-text("Email") + div input, label:has-text("Email") >> .. >> input',
+                    # 通过MUI类名定位第一个输入框
+                    '.MuiTextField-root:first-of-type input',
+                ]
+
+                for selector in selectors:
+                    try:
+                        if page.locator(selector).count() > 0:
+                            page.fill(selector, email_value)
+                            print(f"邮箱填写成功，使用选择器: {selector}")
+                            return True
+                    except Exception as e:
+                        continue
+                return False
+
+            def fill_password_field(password_value):
+                selectors = [
+                    # 通过name属性定位
+                    'input[name="password"]',
+                    # 通过type定位
+                    'input[type="password"]',
+                    # 通过placeholder定位
+                    'input[placeholder*="password"]',
+                    'input[placeholder*="Password"]',
+                    # 通过aria-label定位
+                    'input[aria-label*="password"]',
+                    'input[aria-label*="Password"]',
+                    # 通过autocomplete属性定位
+                    'input[autocomplete="current-password"]',
+                    # 通过父元素的label文本定位
+                    'label:has-text("Password") + div input, label:has-text("Password") >> .. >> input',
+                ]
+
+                for selector in selectors:
+                    try:
+                        if page.locator(selector).count() > 0:
+                            page.fill(selector, password_value)
+                            print(f"密码填写成功，使用选择器: {selector}")
+                            return True
+                    except Exception as e:
+                        continue
+                return False
+
+            if not fill_email_field(email):
+                print("警告: 无法定位到邮箱输入框")
+                try:
+                    page.fill('//*[@id=":r0:"]', email)
+                    print("使用原始XPath填写邮箱成功")
+                except:
+                    print("原始XPath也失效了")
+
+            if not fill_password_field(password):
+                print("警告: 无法定位到密码输入框")
+                try:
+                    page.fill('//*[@id=":r1:"]', password)
+                    print("使用原始XPath填写密码成功")
+                except:
+                    print("原始XPath也失效了")
             page.click('//*[@id="site-content"]/div[2]/div/div/div[1]/form/div/div[4]/button[2]')  # 提交登录表单
 
             print("登录信息已提交。")

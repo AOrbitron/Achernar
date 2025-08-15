@@ -1,4 +1,5 @@
 
+# 注意：请确保notebook第一个block为markdown而不是code，Achernar是靠markdown字样检查页面是否加载完成的，纯懒得改了。
 # Achernar
 [Eridanus](https://github.com/avilliai/Eridanus)衍生项目。
 # 简介
@@ -6,7 +7,7 @@
 - 2.使用flask在本地作为反向代理，自动刷新cpolar隧道链接。(使用frp固定节点时用不到这个。)
 # 部署  
 [示例：部署ai绘画服务](https://eridanus.netlify.app/configuration/ai%E7%BB%98%E7%94%BB/kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB.html)
-  
+
 ## 拉取项目源码
 ```
 git clone https://github.com/avilliai/Achernar

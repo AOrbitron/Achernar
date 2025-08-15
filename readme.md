@@ -1,5 +1,7 @@
 
-# 注意：请确保notebook第一个block为markdown而不是code，Achernar是靠markdown字样检查页面是否加载完成的，纯懒得改了。
+# 注意：请确保notebook第一个block为markdown而不是code，Achernar是靠加载完成后第一个block显示属性为markdown来判断页面是否加载完成的。纯懒得改了。
+
+
 # Achernar
 [Eridanus](https://github.com/avilliai/Eridanus)衍生项目。
 # 简介

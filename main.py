@@ -161,48 +161,210 @@ def start_instance(email, password):
                     page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
 
                     # find_and_click(page,"Edit")
-            print("等待页面加载完成")
-            page.wait_for_selector("button:has-text('Markdown')", state="visible", timeout=120000)
-            if not find_and_click(page, "Save Version"):
-                print("Save Version通用点击方案失效，采用原始方案")
+print("等待页面加载完成")
+            
+            # 使用新的 Markdown 检测策略
+            markdown_detected = False
+            print("开始检测 Markdown 元素...")
+            
+            # 多种 Markdown 检测方法
+            markdown_methods = [
+                # 方法1: 直接检测 Markdown 相关元素
+                lambda: page.locator("button").filter(has_text="Markdown").wait_for(state="visible", timeout=15000),
+                # 方法2: 检测包含 markdown 文本的任意元素
+                lambda: page.locator("//*[contains(text(), 'Markdown')]").wait_for(state="visible", timeout=15000),
+                # 方法3: 检测代码编辑器相关元素
+                lambda: page.locator(".monaco-editor, .code-editor, [data-testid*='editor']").wait_for(state="visible", timeout=15000),
+                # 方法4: 检测页面加载状态指示器
+                lambda: page.locator("[data-testid*='loading']").wait_for(state="hidden", timeout=15000),
+                # 方法5: 等待页面网络空闲
+                lambda: page.wait_for_load_state("networkidle", timeout=15000),
+            ]
+            
+            for i, method in enumerate(markdown_methods, 1):
+                try:
+                    print(f"尝试 Markdown 检测方法 {i}")
+                    method()
+                    print(f"✅ Markdown 检测方法 {i} 成功")
+                    markdown_detected = True
+                    break
+                except Exception as e:
+                    print(f"Markdown 检测方法 {i} 失败")
+                    continue
+            
+            if not markdown_detected:
+                print("⚠️ 所有 Markdown 检测方法都失败，等待额外时间后继续...")
+                time.sleep(10)
+            
+            # 新的 Save Version 点击策略
+            print("尝试点击 Save Version")
+            save_version_success = False
+            
+            # 多种 Save Version 点击方法
+            save_version_methods = [
+                # 方法1: 使用新的定位器策略
+                lambda: page.locator("button").filter(has_text="Save Version").first.click(timeout=10000),
+                # 方法2: 使用文本包含匹配
+                lambda: page.locator("//button[contains(text(), 'Save Version')]").first.click(timeout=10000),
+                # 方法3: 更宽泛的文本匹配
+                lambda: page.locator("//*[contains(text(), 'Save Version')]").first.click(timeout=10000),
+                # 方法4: 使用 get_by_role
+                lambda: page.get_by_role("button", name=re.compile("Save Version", re.IGNORECASE)).click(timeout=10000),
+                # 方法5: 查找所有按钮并过滤
+                lambda: page.locator("button").filter(has_text=re.compile("Save Version", re.IGNORECASE)).first.click(timeout=10000),
+            ]
+            
+            for i, method in enumerate(save_version_methods, 1):
+                try:
+                    print(f"尝试 Save Version 方法 {i}")
+                    method()
+                    print(f"✅ Save Version 点击成功 (方法 {i})")
+                    save_version_success = True
+                    break
+                except Exception as e:
+                    print(f"Save Version 方法 {i} 失败: {e}")
+                    continue
+            
+            # 如果新方法都失败，使用原始 XPath 策略
+            if not save_version_success:
+                print("新 Save Version 策略失效，采用原始 XPath 方案")
                 save_version_buttons = [
                     '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
                     '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
                     '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
-                    '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
+                    '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button',
+                    # 添加更多可能的 XPath
+                    "//button[contains(@class, 'save') or contains(@title, 'Save')]",
+                    "//*[contains(@class, 'toolbar') or contains(@class, 'header')]//button[contains(text(), 'Save')]",
                 ]
+                
                 time.sleep(7)
-                if not save_version(page):
-                    for save_version_button in save_version_buttons:
-                        try:
-                            page.wait_for_selector(save_version_button, state="visible",
-                                                   timeout=30000)  # 使用wait_for_selector替换is_visable
-                            page.click(save_version_button)
-                            print("已保存版本")
-                            break
-                        except Exception as e:
-                            print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
-
-            time.sleep(8)
-            confirm_buttions = [
-                '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
-                '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]'
-                '//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
-                "//button[contains(., 'Save')]",  # 方案 2：利用文本内容
-                "button:has-text('Save')",  # 方案4 利用文本内容
-                "/html/body/div[contains(@class,'MuiDrawer-root') and contains(@class,'MuiDrawer-modal')]/div[contains(@class,'MuiDrawer-paper')]/div/div/div[last()]/div[last()]/button[last()]",
-            ]
-
-            if not save(page):
-                for confirm_button in confirm_buttions:
+                
+                # 先尝试改进的 save_version 函数
+                save_version_function_methods = [
+                    lambda: page.get_by_role("button", name=re.compile("Save Version", re.IGNORECASE)).click(timeout=30000),
+                    lambda: page.locator("button").filter(has_text=re.compile("Save Version", re.IGNORECASE)).click(timeout=30000),
+                    lambda: page.locator("//button[contains(text(), 'Save Version')]").click(timeout=30000),
+                    lambda: page.locator("//*[contains(text(), 'Save Version')]").click(timeout=30000),
+                ]
+                
+                for i, method in enumerate(save_version_function_methods, 1):
                     try:
-                        page.wait_for_selector(confirm_button, state="visible",
-                                               timeout=30000)  # 使用wait_for_selector替换is_visable
-                        page.click(confirm_button)
-                        print("已确认运行")
+                        print(f"尝试改进的 save_version 方法 {i}")
+                        method()
+                        print(f"✅ save_version 成功 (改进方法 {i})")
+                        save_version_success = True
                         break
                     except Exception as e:
-                        print(f"尝试点击 {confirm_button} 失败: 尝试使用其他xpath路径定位")
+                        print(f"改进的 save_version 方法 {i} 失败: {e}")
+                        continue
+                
+                # 最后使用原始 XPath
+                if not save_version_success:
+                    for save_version_button in save_version_buttons:
+                        try:
+                            element = page.locator(save_version_button)
+                            if element.count() > 0:
+                                element.wait_for(state="visible", timeout=30000)
+                                element.click(timeout=30000)
+                                print(f"✅ 已保存版本 (XPath: {save_version_button})")
+                                save_version_success = True
+                                break
+                        except Exception as e:
+                            print(f"尝试点击 {save_version_button} 失败: {e}")
+                            continue
+
+            time.sleep(8)
+            
+            # 新的确认按钮点击策略  
+            print("尝试点击确认/保存按钮")
+            confirm_success = False
+            
+            # 多种确认按钮点击方法
+            confirm_methods = [
+                # 方法1: Save 按钮
+                lambda: page.locator("button").filter(has_text="Save").first.click(timeout=10000),
+                # 方法2: Run 按钮
+                lambda: page.locator("button").filter(has_text="Run").first.click(timeout=10000),
+                # 方法3: Save & Run 按钮
+                lambda: page.locator("button").filter(has_text=re.compile("Save.*Run|Run.*Save", re.IGNORECASE)).first.click(timeout=10000),
+                # 方法4: 模态框中的 Save 按钮
+                lambda: page.locator("[role='dialog'] button, .modal button").filter(has_text="Save").first.click(timeout=10000),
+                # 方法5: 任何包含 Save 或 Run 的按钮
+                lambda: page.locator("//button[contains(text(), 'Save') or contains(text(), 'Run')]").first.click(timeout=10000),
+                # 方法6: 使用 get_by_role
+                lambda: page.get_by_role("button", name=re.compile("Save|Run", re.IGNORECASE)).first.click(timeout=10000),
+            ]
+            
+            for i, method in enumerate(confirm_methods, 1):
+                try:
+                    print(f"尝试确认按钮方法 {i}")
+                    method()
+                    print(f"✅ 确认按钮点击成功 (方法 {i})")
+                    confirm_success = True
+                    break
+                except Exception as e:
+                    print(f"确认按钮方法 {i} 失败: {e}")
+                    continue
+            
+            # 如果新方法都失败，使用原始策略
+            if not confirm_success:
+                print("新确认策略失效，采用原始方案")
+                confirm_buttons = [
+                    '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
+                    '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
+                    '//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
+                    "//button[contains(., 'Save')]",
+                    "button:has-text('Save')", 
+                    "/html/body/div[contains(@class,'MuiDrawer-root') and contains(@class,'MuiDrawer-modal')]/div[contains(@class,'MuiDrawer-paper')]/div/div/div[last()]/div[last()]/button[last()]",
+                    # 添加更多可能的选择器
+                    "//div[contains(@class, 'modal') or contains(@class, 'dialog')]//button[contains(text(), 'Save') or contains(text(), 'Run')]",
+                    "//*[@role='dialog']//button[contains(text(), 'Save') or contains(text(), 'Run')]",
+                ]
+                
+                # 先尝试改进的 save 函数方法
+                save_function_methods = [
+                    lambda: page.get_by_role("button", name=re.compile("Save|Run", re.IGNORECASE)).click(timeout=30000),
+                    lambda: page.locator("button").filter(has_text=re.compile("Save|Run", re.IGNORECASE)).click(timeout=30000),
+                    lambda: page.locator("//button[contains(text(), 'Save') or contains(text(), 'Run')]").click(timeout=30000),
+                    lambda: page.locator("//*[contains(text(), 'Save') or contains(text(), 'Run')]").click(timeout=30000),
+                ]
+                
+                for i, method in enumerate(save_function_methods, 1):
+                    try:
+                        print(f"尝试改进的 save 方法 {i}")
+                        method()
+                        print(f"✅ save 成功 (改进方法 {i})")
+                        confirm_success = True
+                        break
+                    except Exception as e:
+                        print(f"改进的 save 方法 {i} 失败: {e}")
+                        continue
+                
+                # 最后使用原始选择器
+                if not confirm_success:
+                    for confirm_button in confirm_buttons:
+                        try:
+                            element = page.locator(confirm_button)
+                            if element.count() > 0:
+                                element.wait_for(state="visible", timeout=30000)
+                                element.click(timeout=30000)
+                                print(f"✅ 已确认运行 (选择器: {confirm_button})")
+                                confirm_success = True
+                                break
+                        except Exception as e:
+                            print(f"尝试点击 {confirm_button} 失败: {e}")
+                            continue
+            
+            if save_version_success and confirm_success:
+                print("✅ 所有操作完成成功")
+            elif save_version_success:
+                print("⚠️ Save Version 成功，但确认操作可能失败")  
+            elif confirm_success:
+                print("⚠️ 确认操作成功，但 Save Version 可能失败")
+            else:
+                print("❌ 所有操作都可能失败，但继续执行...")
+            
             print("run")
             time.sleep(5)
             print("项目运行中...")

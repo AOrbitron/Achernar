@@ -161,36 +161,38 @@ def start_instance(email, password):
                     page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
 
                     # find_and_click(page,"Edit")
+            # ==================== 主要的替换代码 ====================
+            
             print("等待页面加载完成")
             
-
-
-
-
-
-            if not wait_for_markdown_button(page, 120000):
-                print("⚠️  Markdown按钮检测失败，打印调试信息...")
-                debug_page_elements(page)
-                print("继续执行后续操作...")
-            else:
-                print("✅ 页面加载完成，Markdown按钮已出现")
-            print("save version")
-            # 新的 Save Version 点击策略
-            if not enhanced_save_version_click(page):
-                print("❌ 所有Save Version点击策略都失败了")
-                # 可以选择抛出异常或继续尝试其他方案
-                # raise Exception("无法点击Save Version按钮")
+            # 先做全面的页面调试
+            comprehensive_page_debug(page)
             
-            # 等待保存对话框出现
+            # 1. 等待Markdown按钮
+            print("\\n=== 第一步：等待Markdown按钮 ===")
+            if not ultimate_element_finder(page, ['Markdown'], 'Markdown按钮检测', 120000):
+                print("⚠️ Markdown按钮检测失败，但继续执行...")
+            else:
+                print("✅ Markdown按钮检测成功")
+            
+            # 2. 点击Save Version
+            print("\\n=== 第二步：点击Save Version ===")
+            if not ultimate_click_element(page, ['Save Version'], 'Save Version点击', 90000):
+                print("⚠️ Save Version点击失败")
+            else:
+                print("✅ Save Version点击成功")
+            
+            # 等待弹窗出现
             time.sleep(5)
             
-            # 使用增强的确认保存点击策略  
-            if not enhanced_confirm_save_click(page):
-                print("❌ 所有确认保存点击策略都失败了")
-                # 可以选择抛出异常或继续
-                # raise Exception("无法点击确认保存按钮")
+            # 3. 点击确认保存
+            print("\\n=== 第三步：点击确认保存 ===")
+            if not ultimate_click_element(page, ['Save'], '确认保存点击', 60000):
+                print("⚠️ 确认保存点击失败")
+            else:
+                print("✅ 确认保存点击成功")
             
-            print("保存操作完成")
+            print("\\n=== 所有操作完成 ===")
             time.sleep(5)
             print("项目运行中...")
             page.goto("https://www.kaggle.com/", timeout=900000)  # 返回主页准备退出登录
@@ -216,264 +218,268 @@ def start_instance(email, password):
 """
 目前没电脑用只有平板，靠ai了
 """
-def wait_for_markdown_button(page, timeout=120000):
+def ultimate_element_finder(page, target_texts, action_name, timeout=120000):
     """
-    改进的Markdown按钮检测策略
-    使用多种选择器和检测方法确保能够找到Markdown按钮
+    终极元素查找器 - 使用最底层的方法查找和点击元素
+    Args:
+        page: playwright页面对象
+        target_texts: 目标文本列表 (如 ['Markdown', 'Save Version', 'Save'])
+        action_name: 操作名称
+        timeout: 超时时间(毫秒)
+    Returns:
+        bool: 是否找到目标元素
     """
-    print("等待Markdown按钮出现...")
-    
-    # 多种Markdown按钮的选择器策略
-    markdown_selectors = [
-        # 现代CSS选择器
-        "button:has-text('Markdown')",
-        "*:has-text('Markdown')",
-        
-        # 基于文本内容的XPath选择器
-        "//button[contains(text(), 'Markdown')]",
-        "//*[contains(text(), 'Markdown')]",
-        "//button[text()='Markdown']",
-        "//*[text()='Markdown']",
-        
-        # 基于属性的选择器
-        "button[title*='Markdown']",
-        "button[aria-label*='Markdown']",
-        "*[title*='Markdown']",
-        "*[aria-label*='Markdown']",
-        
-        # 基于类名和数据属性的选择器
-        "button[data-testid*='markdown']",
-        "button[class*='markdown']",
-        "*[data-testid*='markdown']",
-        "*[class*='markdown']",
-        
-        # 通用文本匹配
-        "text=Markdown",
-        
-        # 不区分大小写的匹配
-        "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'markdown')]",
-        "//*[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'markdown')]"
-    ]
+    print(f"开始终极搜索: {action_name}")
     
     start_time = time.time() * 1000
-    check_interval = 2000  # 2秒检查一次
+    check_interval = 3000  # 3秒检查一次
     
     while (time.time() * 1000 - start_time) < timeout:
         try:
-            # 首先等待页面基本加载完成
-            page.wait_for_load_state("domcontentloaded", timeout=5000)
+            # 等待页面基本稳定
+            page.wait_for_load_state("networkidle", timeout=10000)
             
-            # 尝试每个选择器
-            for i, selector in enumerate(markdown_selectors):
-                try:
-                    elements = page.locator(selector)
-                    if elements.count() > 0:
-                        # 检查第一个匹配的元素是否可见
-                        first_element = elements.first
-                        if first_element.is_visible():
-                            print(f"✅ 找到Markdown按钮 - 使用选择器 {i+1}: {selector}")
-                            return True
-                        else:
-                            print(f"找到Markdown元素但不可见 - 选择器 {i+1}: {selector}")
-                except Exception as e:
-                    continue
-            
-            # 如果所有选择器都失败，尝试使用页面内容检查
-            try:
-                page_content = page.content()
-                if 'Markdown' in page_content or 'markdown' in page_content:
-                    print("✅ 页面内容中包含Markdown文字，但选择器无法定位")
-                    # 打印页面中所有包含Markdown的元素，用于调试
-                    try:
-                        all_elements = page.locator("//*[contains(text(), 'Markdown') or contains(text(), 'markdown')]")
-                        count = all_elements.count()
-                        print(f"页面中找到 {count} 个包含Markdown的元素")
+            # 方法1: 使用JavaScript直接在页面中搜索
+            found_element = page.evaluate(f"""
+                () => {{
+                    const targetTexts = {target_texts};
+                    const results = [];
+                    
+                    // 获取所有可能的元素
+                    const allElements = document.querySelectorAll('*');
+                    
+                    for (let element of allElements) {{
+                        const text = (element.textContent || '').trim();
+                        const innerText = (element.innerText || '').trim();
                         
-                        # 打印前几个元素的信息用于调试
-                        for i in range(min(3, count)):
+                        for (let targetText of targetTexts) {{
+                            if (text.includes(targetText) || innerText.includes(targetText)) {{
+                                const rect = element.getBoundingClientRect();
+                                const isVisible = rect.width > 0 && rect.height > 0 && 
+                                                window.getComputedStyle(element).visibility !== 'hidden' &&
+                                                window.getComputedStyle(element).display !== 'none';
+                                
+                                results.push({{
+                                    tagName: element.tagName,
+                                    text: text.substring(0, 100),
+                                    innerText: innerText.substring(0, 100),
+                                    className: element.className,
+                                    id: element.id,
+                                    isVisible: isVisible,
+                                    isButton: element.tagName === 'BUTTON' || element.role === 'button',
+                                    matchedText: targetText,
+                                    rect: {{ x: rect.x, y: rect.y, width: rect.width, height: rect.height }}
+                                }});
+                            }}
+                        }}
+                    }}
+                    
+                    return results;
+                }}
+            """)
+            
+            if found_element and len(found_element) > 0:
+                print(f"✅ JavaScript搜索找到 {len(found_element)} 个匹配元素:")
+                
+                # 打印找到的元素信息
+                for i, elem in enumerate(found_element[:5]):  # 只显示前5个
+                    print(f"  元素 {i+1}: {elem['tagName']} - '{elem['text'][:50]}' - 可见:{elem['isVisible']} - 按钮:{elem['isButton']}")
+                
+                # 优先选择可见的按钮元素
+                clickable_elements = [e for e in found_element if e['isVisible'] and (e['isButton'] or e['tagName'] in ['BUTTON', 'A', 'DIV'])]
+                
+                if clickable_elements:
+                    print(f"找到 {len(clickable_elements)} 个可点击元素")
+                    return True
+                else:
+                    print("找到匹配元素但都不可点击")
+            
+            # 方法2: 检查iframe
+            try:
+                frames = page.frames
+                if len(frames) > 1:
+                    print(f"检测到 {len(frames)} 个frame，逐一检查...")
+                    for frame in frames:
+                        if frame != page.main_frame:
                             try:
-                                element = all_elements.nth(i)
-                                tag_name = element.evaluate("el => el.tagName")
-                                text_content = element.evaluate("el => el.textContent")
-                                is_visible = element.is_visible()
-                                print(f"元素 {i+1}: 标签={tag_name}, 文本='{text_content[:50]}...', 可见={is_visible}")
+                                frame_content = frame.content()
+                                for target_text in target_texts:
+                                    if target_text in frame_content:
+                                        print(f"在iframe中找到 {target_text}")
+                                        return True
                             except:
                                 continue
-                    except:
-                        pass
-                    return True  # 假设页面已加载完成
-                else:
-                    print("页面内容中未找到Markdown文字")
             except Exception as e:
-                print(f"页面内容检查失败: {e}")
-            
+                pass
+                
             elapsed_seconds = int((time.time() * 1000 - start_time) / 1000)
-            print(f"等待Markdown按钮... (已等待 {elapsed_seconds}s)")
+            print(f"继续搜索 {action_name}... (已等待 {elapsed_seconds}s)")
             time.sleep(check_interval / 1000)
             
         except Exception as e:
-            print(f"检测过程中出现错误: {e}")
+            print(f"搜索过程出错: {str(e)}")
             time.sleep(check_interval / 1000)
     
-    print("❌ 等待Markdown按钮超时")
+    print(f"❌ {action_name} 搜索超时")
     return False
 
-def debug_page_elements(page):
+def ultimate_click_element(page, target_texts, action_name, timeout=60000):
     """
-    调试函数：打印页面中所有按钮元素，帮助找到正确的选择器
+    终极元素点击器
     """
-    print("=== 调试信息：页面中的所有按钮 ===")
-    try:
-        buttons = page.locator("button")
-        button_count = buttons.count()
-        print(f"页面中共有 {button_count} 个按钮")
-        
-        for i in range(min(10, button_count)):  # 只打印前10个按钮
-            try:
-                button = buttons.nth(i)
-                text = button.evaluate("el => el.textContent || el.innerText || ''").strip()
-                title = button.evaluate("el => el.title || ''")
-                class_name = button.evaluate("el => el.className || ''")
-                is_visible = button.is_visible()
-                
-                print(f"按钮 {i+1}:")
-                print(f"  文本: '{text}'")
-                print(f"  标题: '{title}'")
-                print(f"  类名: '{class_name}'")
-                print(f"  可见: {is_visible}")
-                print(f"  ---")
-                
-            except Exception as e:
-                print(f"  获取按钮 {i+1} 信息失败: {e}")
-    except Exception as e:
-        print(f"调试信息获取失败: {e}")
-    print("=== 调试信息结束 ===")
-def smart_wait_and_click(page, selectors, action_name, max_wait_time=60000, check_interval=2000):
-    """
-    智能等待并点击元素的函数
-    Args:
-        page: playwright页面对象
-        selectors: 选择器列表，按优先级排序
-        action_name: 操作名称，用于日志输出
-        max_wait_time: 最大等待时间(毫秒)
-        check_interval: 检查间隔(毫秒)
-    Returns:
-        bool: 是否成功点击
-    """
-    print(f"开始尝试{action_name}...")
+    print(f"开始点击操作: {action_name}")
     
     start_time = time.time() * 1000
     
-    while (time.time() * 1000 - start_time) < max_wait_time:
-        # 等待页面稳定
+    while (time.time() * 1000 - start_time) < timeout:
         try:
-            page.wait_for_load_state("networkidle", timeout=5000)
-        except:
-            pass
+            # 使用JavaScript查找并点击元素
+            click_result = page.evaluate(f"""
+                () => {{
+                    const targetTexts = {target_texts};
+                    
+                    // 获取所有可能的可点击元素
+                    const allElements = document.querySelectorAll('button, a, div[role="button"], span[role="button"], *[onclick]');
+                    
+                    for (let element of allElements) {{
+                        const text = (element.textContent || '').trim();
+                        const innerText = (element.innerText || '').trim();
+                        
+                        for (let targetText of targetTexts) {{
+                            if (text.includes(targetText) || innerText.includes(targetText)) {{
+                                const rect = element.getBoundingClientRect();
+                                const isVisible = rect.width > 0 && rect.height > 0 && 
+                                                window.getComputedStyle(element).visibility !== 'hidden' &&
+                                                window.getComputedStyle(element).display !== 'none';
+                                
+                                if (isVisible) {{
+                                    // 滚动到元素位置
+                                    element.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+                                    
+                                    // 等待一下再点击
+                                    setTimeout(() => {{
+                                        element.click();
+                                    }}, 500);
+                                    
+                                    return {{
+                                        success: true,
+                                        elementInfo: {{
+                                            tagName: element.tagName,
+                                            text: text.substring(0, 50),
+                                            matchedText: targetText
+                                        }}
+                                    }};
+                                }}
+                            }}
+                        }}
+                    }}
+                    
+                    return {{ success: false, reason: 'No clickable element found' }};
+                }}
+            """)
             
-        for i, selector in enumerate(selectors):
-            try:
-                # 检查元素是否存在且可见
-                if page.locator(selector).count() > 0:
-                    element = page.locator(selector).first
-                    if element.is_visible():
-                        try:
-                            # 滚动到元素位置
-                            element.scroll_into_view_if_needed(timeout=3000)
-                            time.sleep(0.5)
-                            
-                            # 尝试点击
-                            element.click(timeout=5000)
-                            print(f"{action_name}成功 - 使用选择器 {i+1}: {selector}")
-                            return True
-                        except Exception as click_error:
-                            print(f"点击失败 - 选择器 {i+1}: {str(click_error)}")
-                            continue
-            except Exception as e:
-                continue
+            if click_result and click_result.get('success'):
+                print(f"✅ {action_name} 点击成功!")
+                print(f"   点击的元素: {click_result['elementInfo']['tagName']} - '{click_result['elementInfo']['text']}'")
+                time.sleep(2)  # 等待点击生效
+                return True
+            else:
+                print(f"点击尝试失败: {click_result.get('reason', '未知原因')}")
+                
+        except Exception as e:
+            print(f"点击过程出错: {str(e)}")
         
-        print(f"等待{action_name}元素出现... (已等待 {int((time.time() * 1000 - start_time)/1000)}s)")
-        time.sleep(check_interval / 1000)
+        time.sleep(2)
+        
+        if (time.time() * 1000 - start_time) > timeout:
+            break
     
-    print(f"❌ {action_name}失败 - 超时")
+    print(f"❌ {action_name} 点击失败")
     return False
 
-def enhanced_save_version_click(page):
-    """增强的Save Version点击策略"""
+def comprehensive_page_debug(page):
+    """
+    全面的页面调试信息
+    """
+    print("=== 全面页面调试信息 ===")
+    try:
+        # 页面基本信息
+        url = page.url
+        title = page.title()
+        print(f"当前页面: {url}")
+        print(f"页面标题: {title}")
+        
+        # 检查页面中的所有文本内容
+        all_text = page.evaluate("""
+            () => {
+                const texts = [];
+                const walker = document.createTreeWalker(
+                    document.body,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+                
+                let node;
+                while (node = walker.nextNode()) {
+                    const text = node.textContent.trim();
+                    if (text.length > 0) {
+                        texts.push(text);
+                    }
+                }
+                return texts;
+            }
+        """)
+        
+        # 查找包含关键词的文本
+        keywords = ['Markdown', 'Save', 'Version', 'Run']
+        found_texts = []
+        for text in all_text:
+            for keyword in keywords:
+                if keyword.lower() in text.lower():
+                    found_texts.append(f"'{text[:100]}...'")
+                    break
+        
+        print(f"找到包含关键词的文本 ({len(found_texts)}个):")
+        for text in found_texts[:10]:  # 只显示前10个
+            print(f"  {text}")
+        
+        # 检查所有按钮
+        buttons_info = page.evaluate("""
+            () => {
+                const buttons = document.querySelectorAll('button, a, div[role="button"], span[role="button"]');
+                const results = [];
+                
+                buttons.forEach((btn, index) => {
+                    if (index < 20) {  // 只检查前20个
+                        const rect = btn.getBoundingClientRect();
+                        const isVisible = rect.width > 0 && rect.height > 0;
+                        
+                        results.push({
+                            index: index,
+                            tagName: btn.tagName,
+                            text: (btn.textContent || '').trim().substring(0, 50),
+                            className: btn.className,
+                            id: btn.id,
+                            isVisible: isVisible
+                        });
+                    }
+                });
+                
+                return results;
+            }
+        """)
+        
+        print(f"\\n页面中的按钮元素 ({len(buttons_info)}个):")
+        for btn in buttons_info:
+            print(f"  [{btn['index']}] {btn['tagName']} - '{btn['text']}' - 可见:{btn['isVisible']}")
+        
+    except Exception as e:
+        print(f"调试信息获取失败: {str(e)}")
     
-    # 多层级的选择器策略，从最可靠到最通用
-    save_version_selectors = [
-        # 第一优先级：基于角色和文本的现代选择器
-        "button[role='button']:has-text('Save Version')",
-        "button:has-text('Save Version')",
-        "*[role='button']:has-text('Save Version')",
-        
-        # 第二优先级：基于属性的选择器
-        "button[title*='Save Version']",
-        "button[aria-label*='Save Version']",
-        "*[title*='Save Version']",
-        
-        # 第三优先级：基于类名和结构的选择器
-        "button[class*='save'], button[class*='Save']",
-        ".sc-button:has-text('Save')",
-        "[class*='Button']:has-text('Save Version')",
-        
-        # 第四优先级：通用文本匹配
-        "//*[contains(text(), 'Save Version')]",
-        "//button[contains(., 'Save')]",
-        "//*[@role='button' and contains(., 'Save')]",
-        
-        # 第五优先级：结构性选择器
-        "#site-content button:has-text('Save')",
-        "[id*='site-content'] button:has-text('Save')",
-        
-        # 第六优先级：原有的XPath选择器作为最后备份
-        '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
-        '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
-        '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
-        '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
-    ]
-    
-    return smart_wait_and_click(page, save_version_selectors, "Save Version点击", 90000)
+    print("=== 调试信息结束 ===\\n")
 
-def enhanced_confirm_save_click(page):
-    """增强的确认保存点击策略"""
-    
-    # 多层级的确认按钮选择器
-    confirm_selectors = [
-        # 第一优先级：现代选择器
-        "button[role='button']:has-text('Save')",
-        "button:has-text('Save'):not(:has-text('Version'))",
-        "*[role='button']:has-text('Save'):not(:has-text('Version'))",
-        
-        # 第二优先级：对话框中的按钮
-        "[role='dialog'] button:has-text('Save')",
-        ".MuiDialog-root button:has-text('Save')",
-        "[class*='dialog'] button:has-text('Save')",
-        "[class*='modal'] button:has-text('Save')",
-        
-        # 第三优先级：基于位置的选择器
-        "[role='dialog'] button:last-child",
-        ".MuiDialog-actions button:last-child",
-        "[class*='dialog'] [class*='actions'] button:last-child",
-        
-        # 第四优先级：通用文本匹配
-        "//button[text()='Save']",
-        "//button[contains(., 'Save') and not(contains(., 'Version'))]",
-        "//*[@role='button' and text()='Save']",
-        
-        # 第五优先级：MUI特定选择器
-        ".MuiButton-root:has-text('Save')",
-        "[class*='MuiButton']:has-text('Save')",
-        
-        # 第六优先级：原有XPath作为备份
-        '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
-        '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
-        '//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
-        "/html/body/div[contains(@class,'MuiDrawer-root') and contains(@class,'MuiDrawer-modal')]/div[contains(@class,'MuiDrawer-paper')]/div/div/div[last()]/div[last()]/button[last()]"
-    ]
-    
-    return smart_wait_and_click(page, confirm_selectors, "确认保存点击", 60000)
+
 """
 以上均为ai生成修复代码
 """

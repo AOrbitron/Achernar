@@ -165,34 +165,34 @@ def start_instance(email, password):
             
             print("等待页面加载完成")
             
-            # 先做全面的页面调试
-            comprehensive_page_debug(page)
-            
-            # 1. 等待Markdown按钮
-            print("\\n=== 第一步：等待Markdown按钮 ===")
-            if not ultimate_element_finder(page, ['Markdown'], 'Markdown按钮检测', 120000):
-                print("⚠️ Markdown按钮检测失败，但继续执行...")
+            # 第一步：等待Markdown文本出现
+            if not wait_for_text_to_appear(page, "Markdown", 120000):
+                print("⚠️  Markdown文本未出现，但继续执行后续操作...")
             else:
-                print("✅ Markdown按钮检测成功")
+                print("✅ Markdown文本已出现，页面加载完成")
             
-            # 2. 点击Save Version
-            print("\\n=== 第二步：点击Save Version ===")
-            if not ultimate_click_element(page, ['Save Version'], 'Save Version点击', 90000):
-                print("⚠️ Save Version点击失败")
+            # 第二步：点击Save Version文本
+            print("\\n开始点击Save Version...")
+            if not click_text_with_retry(page, "Save Version", max_retries=3):
+                print("⚠️  Save Version点击失败，尝试点击包含Save的文本...")
+                # 备用方案：尝试点击任何包含"Save"的文本
+                if not click_text_with_retry(page, "Save", max_retries=2):
+                    print("❌ 所有保存相关的点击都失败了")
             else:
                 print("✅ Save Version点击成功")
             
-            # 等待弹窗出现
+            # 等待保存对话框出现
             time.sleep(5)
             
-            # 3. 点击确认保存
-            print("\\n=== 第三步：点击确认保存 ===")
-            if not ultimate_click_element(page, ['Save'], '确认保存点击', 60000):
-                print("⚠️ 确认保存点击失败")
+            # 第三步：点击确认保存的Save按钮
+            print("\\n开始点击确认保存...")
+            # 在对话框中查找Save按钮，避免与之前的Save Version混淆
+            if not click_text_with_retry(page, "Save", max_retries=3):
+                print("❌ 确认保存点击失败")
             else:
                 print("✅ 确认保存点击成功")
             
-            print("\\n=== 所有操作完成 ===")
+            print("\\n所有文本点击操作完成")
             time.sleep(5)
             print("项目运行中...")
             page.goto("https://www.kaggle.com/", timeout=900000)  # 返回主页准备退出登录
@@ -218,266 +218,175 @@ def start_instance(email, password):
 """
 目前没电脑用只有平板，靠ai了
 """
-def ultimate_element_finder(page, target_texts, action_name, timeout=120000):
+def find_and_click_text(page, target_text, timeout=60000):
     """
-    终极元素查找器 - 使用最底层的方法查找和点击元素
+    在整个页面中搜索文本并直接点击，类似于Ctrl+F搜索
     Args:
         page: playwright页面对象
-        target_texts: 目标文本列表 (如 ['Markdown', 'Save Version', 'Save'])
-        action_name: 操作名称
+        target_text: 要搜索的目标文本
         timeout: 超时时间(毫秒)
     Returns:
-        bool: 是否找到目标元素
+        bool: 是否成功点击
     """
-    print(f"开始终极搜索: {action_name}")
-    
-    start_time = time.time() * 1000
-    check_interval = 3000  # 3秒检查一次
-    
-    while (time.time() * 1000 - start_time) < timeout:
-        try:
-            # 等待页面基本稳定
-            page.wait_for_load_state("networkidle", timeout=10000)
-            
-            # 方法1: 使用JavaScript直接在页面中搜索
-            found_element = page.evaluate(f"""
-                () => {{
-                    const targetTexts = {target_texts};
-                    const results = [];
-                    
-                    // 获取所有可能的元素
-                    const allElements = document.querySelectorAll('*');
-                    
-                    for (let element of allElements) {{
-                        const text = (element.textContent || '').trim();
-                        const innerText = (element.innerText || '').trim();
-                        
-                        for (let targetText of targetTexts) {{
-                            if (text.includes(targetText) || innerText.includes(targetText)) {{
-                                const rect = element.getBoundingClientRect();
-                                const isVisible = rect.width > 0 && rect.height > 0 && 
-                                                window.getComputedStyle(element).visibility !== 'hidden' &&
-                                                window.getComputedStyle(element).display !== 'none';
-                                
-                                results.push({{
-                                    tagName: element.tagName,
-                                    text: text.substring(0, 100),
-                                    innerText: innerText.substring(0, 100),
-                                    className: element.className,
-                                    id: element.id,
-                                    isVisible: isVisible,
-                                    isButton: element.tagName === 'BUTTON' || element.role === 'button',
-                                    matchedText: targetText,
-                                    rect: {{ x: rect.x, y: rect.y, width: rect.width, height: rect.height }}
-                                }});
-                            }}
-                        }}
-                    }}
-                    
-                    return results;
-                }}
-            """)
-            
-            if found_element and len(found_element) > 0:
-                print(f"✅ JavaScript搜索找到 {len(found_element)} 个匹配元素:")
-                
-                # 打印找到的元素信息
-                for i, elem in enumerate(found_element[:5]):  # 只显示前5个
-                    print(f"  元素 {i+1}: {elem['tagName']} - '{elem['text'][:50]}' - 可见:{elem['isVisible']} - 按钮:{elem['isButton']}")
-                
-                # 优先选择可见的按钮元素
-                clickable_elements = [e for e in found_element if e['isVisible'] and (e['isButton'] or e['tagName'] in ['BUTTON', 'A', 'DIV'])]
-                
-                if clickable_elements:
-                    print(f"找到 {len(clickable_elements)} 个可点击元素")
-                    return True
-                else:
-                    print("找到匹配元素但都不可点击")
-            
-            # 方法2: 检查iframe
-            try:
-                frames = page.frames
-                if len(frames) > 1:
-                    print(f"检测到 {len(frames)} 个frame，逐一检查...")
-                    for frame in frames:
-                        if frame != page.main_frame:
-                            try:
-                                frame_content = frame.content()
-                                for target_text in target_texts:
-                                    if target_text in frame_content:
-                                        print(f"在iframe中找到 {target_text}")
-                                        return True
-                            except:
-                                continue
-            except Exception as e:
-                pass
-                
-            elapsed_seconds = int((time.time() * 1000 - start_time) / 1000)
-            print(f"继续搜索 {action_name}... (已等待 {elapsed_seconds}s)")
-            time.sleep(check_interval / 1000)
-            
-        except Exception as e:
-            print(f"搜索过程出错: {str(e)}")
-            time.sleep(check_interval / 1000)
-    
-    print(f"❌ {action_name} 搜索超时")
-    return False
-
-def ultimate_click_element(page, target_texts, action_name, timeout=60000):
-    """
-    终极元素点击器
-    """
-    print(f"开始点击操作: {action_name}")
+    print(f"在页面中搜索并点击文本: '{target_text}'")
     
     start_time = time.time() * 1000
     
     while (time.time() * 1000 - start_time) < timeout:
         try:
-            # 使用JavaScript查找并点击元素
+            # 等待页面稳定
+            page.wait_for_load_state("networkidle", timeout=5000)
+            
+            # 使用JavaScript在整个页面中搜索文本并点击
             click_result = page.evaluate(f"""
-                () => {{
-                    const targetTexts = {target_texts};
+                (targetText) => {{
+                    // 创建一个TreeWalker来遍历所有文本节点
+                    const walker = document.createTreeWalker(
+                        document.body,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
                     
-                    // 获取所有可能的可点击元素
-                    const allElements = document.querySelectorAll('button, a, div[role="button"], span[role="button"], *[onclick]');
+                    let node;
+                    const foundElements = [];
                     
-                    for (let element of allElements) {{
-                        const text = (element.textContent || '').trim();
-                        const innerText = (element.innerText || '').trim();
-                        
-                        for (let targetText of targetTexts) {{
-                            if (text.includes(targetText) || innerText.includes(targetText)) {{
-                                const rect = element.getBoundingClientRect();
+                    // 遍历所有文本节点
+                    while (node = walker.nextNode()) {{
+                        const text = node.textContent;
+                        if (text && text.includes(targetText)) {{
+                            const parentElement = node.parentElement;
+                            if (parentElement) {{
+                                const rect = parentElement.getBoundingClientRect();
                                 const isVisible = rect.width > 0 && rect.height > 0 && 
-                                                window.getComputedStyle(element).visibility !== 'hidden' &&
-                                                window.getComputedStyle(element).display !== 'none';
+                                                rect.top >= 0 && rect.left >= 0 &&
+                                                window.getComputedStyle(parentElement).visibility !== 'hidden' &&
+                                                window.getComputedStyle(parentElement).display !== 'none';
                                 
                                 if (isVisible) {{
-                                    // 滚动到元素位置
-                                    element.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
-                                    
-                                    // 等待一下再点击
-                                    setTimeout(() => {{
-                                        element.click();
-                                    }}, 500);
-                                    
-                                    return {{
-                                        success: true,
-                                        elementInfo: {{
-                                            tagName: element.tagName,
-                                            text: text.substring(0, 50),
-                                            matchedText: targetText
-                                        }}
-                                    }};
+                                    foundElements.push({{
+                                        element: parentElement,
+                                        text: text.trim(),
+                                        rect: rect
+                                    }});
                                 }}
                             }}
                         }}
                     }}
                     
-                    return {{ success: false, reason: 'No clickable element found' }};
+                    // 如果找到了元素，点击第一个
+                    if (foundElements.length > 0) {{
+                        const targetElement = foundElements[0].element;
+                        
+                        // 滚动到元素位置
+                        targetElement.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+                        
+                        // 模拟鼠标点击
+                        const clickEvent = new MouseEvent('click', {{
+                            view: window,
+                            bubbles: true,
+                            cancelable: true
+                        }});
+                        
+                        targetElement.dispatchEvent(clickEvent);
+                        
+                        // 也尝试直接调用click方法
+                        if (targetElement.click) {{
+                            targetElement.click();
+                        }}
+                        
+                        return {{
+                            success: true,
+                            foundCount: foundElements.length,
+                            clickedText: foundElements[0].text,
+                            elementTag: targetElement.tagName,
+                            elementClass: targetElement.className
+                        }};
+                    }}
+                    
+                    return {{
+                        success: false,
+                        foundCount: 0,
+                        reason: 'No visible elements containing the text were found'
+                    }};
                 }}
-            """)
+            """, target_text)
             
-            if click_result and click_result.get('success'):
-                print(f"✅ {action_name} 点击成功!")
-                print(f"   点击的元素: {click_result['elementInfo']['tagName']} - '{click_result['elementInfo']['text']}'")
+            if click_result.get('success'):
+                print(f"✅ 找到并点击了文本 '{target_text}'")
+                print(f"   找到 {click_result['foundCount']} 个匹配元素")
+                print(f"   点击的元素: {click_result['elementTag']} - '{click_result['clickedText'][:50]}...'")
                 time.sleep(2)  # 等待点击生效
                 return True
             else:
-                print(f"点击尝试失败: {click_result.get('reason', '未知原因')}")
+                print(f"未找到可点击的文本 '{target_text}': {click_result.get('reason', '未知原因')}")
                 
         except Exception as e:
-            print(f"点击过程出错: {str(e)}")
+            print(f"搜索点击过程出错: {str(e)}")
+        
+        # 等待一段时间后重试
+        elapsed_seconds = int((time.time() * 1000 - start_time) / 1000)
+        if elapsed_seconds % 10 == 0:  # 每10秒打印一次
+            print(f"继续搜索 '{target_text}'... (已等待 {elapsed_seconds}s)")
         
         time.sleep(2)
-        
-        if (time.time() * 1000 - start_time) > timeout:
-            break
     
-    print(f"❌ {action_name} 点击失败")
+    print(f"❌ 搜索点击 '{target_text}' 超时失败")
     return False
 
-def comprehensive_page_debug(page):
+def wait_for_text_to_appear(page, target_text, timeout=120000):
     """
-    全面的页面调试信息
+    等待指定文本在页面中出现
+    Args:
+        page: playwright页面对象
+        target_text: 要等待的文本
+        timeout: 超时时间(毫秒)
+    Returns:
+        bool: 文本是否出现
     """
-    print("=== 全面页面调试信息 ===")
-    try:
-        # 页面基本信息
-        url = page.url
-        title = page.title()
-        print(f"当前页面: {url}")
-        print(f"页面标题: {title}")
-        
-        # 检查页面中的所有文本内容
-        all_text = page.evaluate("""
-            () => {
-                const texts = [];
-                const walker = document.createTreeWalker(
-                    document.body,
-                    NodeFilter.SHOW_TEXT,
-                    null,
-                    false
-                );
-                
-                let node;
-                while (node = walker.nextNode()) {
-                    const text = node.textContent.trim();
-                    if (text.length > 0) {
-                        texts.push(text);
-                    }
-                }
-                return texts;
-            }
-        """)
-        
-        # 查找包含关键词的文本
-        keywords = ['Markdown', 'Save', 'Version', 'Run']
-        found_texts = []
-        for text in all_text:
-            for keyword in keywords:
-                if keyword.lower() in text.lower():
-                    found_texts.append(f"'{text[:100]}...'")
-                    break
-        
-        print(f"找到包含关键词的文本 ({len(found_texts)}个):")
-        for text in found_texts[:10]:  # 只显示前10个
-            print(f"  {text}")
-        
-        # 检查所有按钮
-        buttons_info = page.evaluate("""
-            () => {
-                const buttons = document.querySelectorAll('button, a, div[role="button"], span[role="button"]');
-                const results = [];
-                
-                buttons.forEach((btn, index) => {
-                    if (index < 20) {  // 只检查前20个
-                        const rect = btn.getBoundingClientRect();
-                        const isVisible = rect.width > 0 && rect.height > 0;
-                        
-                        results.push({
-                            index: index,
-                            tagName: btn.tagName,
-                            text: (btn.textContent || '').trim().substring(0, 50),
-                            className: btn.className,
-                            id: btn.id,
-                            isVisible: isVisible
-                        });
-                    }
-                });
-                
-                return results;
-            }
-        """)
-        
-        print(f"\\n页面中的按钮元素 ({len(buttons_info)}个):")
-        for btn in buttons_info:
-            print(f"  [{btn['index']}] {btn['tagName']} - '{btn['text']}' - 可见:{btn['isVisible']}")
-        
-    except Exception as e:
-        print(f"调试信息获取失败: {str(e)}")
+    print(f"等待文本 '{target_text}' 出现在页面中...")
     
-    print("=== 调试信息结束 ===\\n")
+    start_time = time.time() * 1000
+    
+    while (time.time() * 1000 - start_time) < timeout:
+        try:
+            # 使用JavaScript检查页面中是否包含目标文本
+            text_found = page.evaluate(f"""
+                (targetText) => {{
+                    // 检查整个页面的文本内容
+                    const bodyText = document.body.textContent || document.body.innerText || '';
+                    return bodyText.includes(targetText);
+                }}
+            """, target_text)
+            
+            if text_found:
+                print(f"✅ 文本 '{target_text}' 已出现在页面中")
+                return True
+                
+        except Exception as e:
+            print(f"检查文本时出错: {str(e)}")
+        
+        elapsed_seconds = int((time.time() * 1000 - start_time) / 1000)
+        if elapsed_seconds % 15 == 0:  # 每15秒打印一次
+            print(f"继续等待 '{target_text}'... (已等待 {elapsed_seconds}s)")
+        
+        time.sleep(3)
+    
+    print(f"❌ 等待文本 '{target_text}' 出现超时")
+    return False
+
+def click_text_with_retry(page, target_text, max_retries=3, timeout=30000):
+    """
+    重试点击文本
+    """
+    for attempt in range(max_retries):
+        print(f"第 {attempt + 1} 次尝试点击 '{target_text}'")
+        if find_and_click_text(page, target_text, timeout):
+            return True
+        if attempt < max_retries - 1:
+            print(f"等待3秒后重试...")
+            time.sleep(3)
+    return False
 
 
 """

@@ -161,7 +161,7 @@ def start_instance(email, password):
                     page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
 
                     # find_and_click(page,"Edit")
-print("等待页面加载完成")
+            print("等待页面加载完成")
             
             # 使用新的 Markdown 检测策略
             markdown_detected = False

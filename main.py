@@ -11,7 +11,6 @@ import requests
 import platform
 
 from playwright.sync_api import sync_playwright
-from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 import re
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
@@ -197,7 +196,7 @@ def start_instance(email, password):
                 browser.close()
             except Exception as e:
                 print(f"{str(e)}")
-def click_by_text(page: Page, text: str, timeout: int = 50000, exact: bool = True):
+def click_by_text(page, text: str, timeout: int = 50000, exact: bool = True):
     """
     在页面中查找指定文本并点击，就像 Ctrl+F 搜索一样。
     

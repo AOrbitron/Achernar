@@ -162,17 +162,47 @@ def start_instance(email, password):
 
                     # find_and_click(page,"Edit")
             print("等待页面加载完成")
-            try:
-                page.wait_for_selector("button:has-text('Markdown')", state="visible", timeout=120000)
-            except:
-                print("检查器寄了")
-            click_by_text(page, "Markdown")
-            click_by_text(page, "Save Version")
-            time.sleep(8)
-            click_by_text(page, "Save")
+            page.wait_for_selector("button:has-text('Markdown')", state="visible", timeout=120000)
+            if not find_and_click(page, "Save Version"):
+                print("Save Version通用点击方案失效，采用原始方案")
+                save_version_buttons = [
+                    '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
+                    '//*[@id="site-content"]/div[2]/div[2]/div/div[1]/div/div/div[4]/div[1]/button',
+                    '//*[@id="site-content"]/div[3]/div/div[1]/div/div/div[4]/div[1]/button',
+                    '//*[@id="site-content"]/div[2]/div/div[1]/div/div/div[4]/span[1]/div/button'
+                ]
+                time.sleep(7)
+                if not save_version(page):
+                    for save_version_button in save_version_buttons:
+                        try:
+                            page.wait_for_selector(save_version_button, state="visible",
+                                                   timeout=30000)  # 使用wait_for_selector替换is_visable
+                            page.click(save_version_button)
+                            print("已保存版本")
+                            break
+                        except Exception as e:
+                            print(f"尝试点击 {save_version_button} 失败: 尝试使用其他xpath路径定位")
 
             time.sleep(8)
+            confirm_buttions = [
+                '//*[@id="kaggle-portal-root-global"]/div/div[3]/div/div/div[4]/div[2]/button[2]',
+                '/html/body/div[2]/div[3]/div/div/div[4]/div[2]/button[2]'
+                '//*[@id="kaggle-portal-root-global"]/div[2]/div[3]/div/div/div[4]/div[2]/button[2]',
+                "//button[contains(., 'Save')]",  # 方案 2：利用文本内容
+                "button:has-text('Save')",  # 方案4 利用文本内容
+                "/html/body/div[contains(@class,'MuiDrawer-root') and contains(@class,'MuiDrawer-modal')]/div[contains(@class,'MuiDrawer-paper')]/div/div/div[last()]/div[last()]/button[last()]",
+            ]
 
+            if not save(page):
+                for confirm_button in confirm_buttions:
+                    try:
+                        page.wait_for_selector(confirm_button, state="visible",
+                                               timeout=30000)  # 使用wait_for_selector替换is_visable
+                        page.click(confirm_button)
+                        print("已确认运行")
+                        break
+                    except Exception as e:
+                        print(f"尝试点击 {confirm_button} 失败: 尝试使用其他xpath路径定位")
             print("run")
             time.sleep(5)
             print("项目运行中...")
@@ -196,33 +226,7 @@ def start_instance(email, password):
                 browser.close()
             except Exception as e:
                 print(f"{str(e)}")
-def click_by_text(page, text: str, timeout: int = 50000, exact: bool = True):
-    """
-    在页面中查找指定文本并点击，就像 Ctrl+F 搜索一样。
-    
-    :param page: Playwright 的 Page 对象
-    :param text: 要查找的可见文本
-    :param timeout: 等待超时时间，毫秒（默认 10 秒）
-    :param exact: 是否要求完全匹配文本（True=完全匹配，False=包含即可）
-    """
-    try:
-        # 建立定位器
-        locator = page.get_by_text(text, exact=exact)
-        
-        # 等待文本出现并可见
-        locator.wait_for(state="visible", timeout=timeout)
-        
-        # 点击
-        locator.click()
-        print(f"✅ 成功点击文本: {text}")
-        return True
 
-    except PlaywrightTimeoutError:
-        print(f"❌ 超时：未找到文本 '{text}'")
-        return False
-    except Exception as e:
-        print(f"⚠️ 点击文本 '{text}' 失败: {e}")
-        return False
 
 def find_and_click(page, text, timeout=30000):
     """

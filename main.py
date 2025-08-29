@@ -167,7 +167,7 @@ def start_instance(email, password):
                     pass
                 else:
                     page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',
-                                           state="visible", timeout=30000)
+                                           state="visible", timeout=120000)
                     page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
 
 

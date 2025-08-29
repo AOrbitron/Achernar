@@ -157,7 +157,7 @@ def start_instance(email, password):
                         for twi in twice_buttons:
                             try:
                                 page.wait_for_selector(twi, state="visible",
-                                                       timeout=30000)  # 使用wait_for_selector替换is_visable
+                                                       timeout=120000)  # 使用wait_for_selector替换is_visable
                                 page.click(twi)
                                 print("已选择kaggle")
                                 break

@@ -165,9 +165,10 @@ def start_instance(email, password):
                                 print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
                 elif find_and_click(page, "Edit My Copy"):
                     pass
+                elif find_and_click(page, "Edit"):
+                    pass
                 else:
-                    page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',
-                                           state="visible", timeout=120000)
+                    page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',state="visible", timeout=120000)
                     page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
 
 

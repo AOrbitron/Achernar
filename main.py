@@ -2,6 +2,7 @@ import os
 import random
 import threading
 import time
+import traceback
 
 import yaml
 from bs4 import BeautifulSoup
@@ -149,36 +150,38 @@ def start_instance(email, password):
 
             # 尝试运行项目
             time.sleep(10)  # 等待项目加载完成
-            with context.expect_page() as new_page_info:
-                if find_and_click(page, "Copy & Edit"):
-                    print("kaggle要求二次点击，点击Edit in Kaggle Notebooks")
-                    if not find_and_click(page, "Edit in Kaggle Notebooks"):
-                        twice_buttons = ["/html/body/div[3]/div[3]/li[1]/div"]
-                        for twi in twice_buttons:
-                            try:
-                                page.wait_for_selector(twi, state="visible",
-                                                       timeout=120000)  # 使用wait_for_selector替换is_visable
-                                page.click(twi)
-                                print("已选择kaggle")
-                                break
-                            except Exception as e:
-                                print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
-                elif find_and_click(page, "Edit My Copy"):
-                    pass
-                else:
-                    page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',
-                                           state="visible", timeout=120000)
-                    page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
+            try:
+                with context.expect_page() as new_page_info:
+                    if find_and_click(page, "Copy & Edit"):
+                        print("kaggle要求二次点击，点击Edit in Kaggle Notebooks")
+                        if not find_and_click(page, "Edit in Kaggle Notebooks"):
+                            twice_buttons = ["/html/body/div[3]/div[3]/li[1]/div"]
+                            for twi in twice_buttons:
+                                try:
+                                    page.wait_for_selector(twi, state="visible",
+                                                           timeout=120000)  # 使用wait_for_selector替换is_visable
+                                    page.click(twi)
+                                    print("已选择kaggle")
+                                    break
+                                except Exception as e:
+                                    print(f"尝试点击 {twi} 失败: 尝试使用其他xpath路径定位")
+                    elif find_and_click(page, "Edit My Copy"):
+                        pass
+
+                    else:
+                        page.wait_for_selector('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button',state="visible", timeout=120000)
+                        page.click('//*[@id="site-content"]/div[2]/div/div/div[2]/div[1]/div/a/button')
 
 
 
-            # 这里会真正拿到新开的页面对象
-            new_page = new_page_info.value
-            print("切换到新页面:", new_page.url)
+                # 这里会真正拿到新开的页面对象
+                new_page = new_page_info.value
+                print("切换到新页面:", new_page.url)
 
-            # 之后都用 new_page，而不是旧的 page
-            page = new_page
-
+                # 之后都用 new_page，而不是旧的 page
+                page = new_page
+            except Exception as e:
+                print(f"有报错：{str(e)}，但或许不影响运行")
 
             def switch_to_notebook_page(context):
                 for p in context.pages:
@@ -247,6 +250,7 @@ def start_instance(email, password):
                 browser.close()
             except Exception as e:
                 print(f"{str(e)}")
+                traceback.print_exc()
         start_instance(email, password)
     finally:
 

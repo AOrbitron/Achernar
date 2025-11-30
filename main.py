@@ -392,7 +392,9 @@ def cpolar_main():
         'login': data["cpolar"]["email"],
         'password': data["cpolar"]["password"]
     }
-
+    for var in ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"]:
+        if var in os.environ:
+            del os.environ[var]
     # 创建一个 Session 对象，避免每次请求都重新登录
     session = requests.Session()
 

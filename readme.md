@@ -1,14 +1,10 @@
 
-# 注意：请确保notebook第一个block为markdown而不是code，Achernar是靠加载完成后第一个block显示属性为markdown来判断页面是否加载完成的。纯懒得改了。
-
-
 # Achernar
 [Eridanus](https://github.com/avilliai/Eridanus)衍生项目。
 # 简介
 - 1.自动运行公开kaggle脚本，在运行一定时长后自动切换账号并重新运行脚本。
 - 2.使用flask在本地作为反向代理，自动刷新cpolar隧道链接。(使用frp固定节点时用不到这个。)
 # 部署  
-[示例：部署ai绘画服务](https://eridanus.netlify.app/configuration/ai%E7%BB%98%E7%94%BB/kaggle%E9%83%A8%E7%BD%B2ai%E7%BB%98%E7%94%BB.html)
 
 ## 拉取项目源码
 ```
@@ -29,42 +25,41 @@ git clone --depth 1 https://github.moeyy.xyz/https://github.com/avilliai/Acherna
 ## 编辑Achernar配置文件  
 `Achernar/config.yaml`  
 ```yaml  
-#下面这两个代理项，一般不用配置。代理软件开规则代理完全够用。  
-proxy: ""     #登录kaggle时使用的代理。  
-quest_proxy: ""  #sd api请求时使用的代理地址，如果开启代理后，Achernar反代不能正常工作请填写此项。你代理软件的http代理地址。取决于具体情况，clash一般http://127.0.0.1:7890  
-port: 3529  
-headless: true   #浏览器无头模式  
-#在shared_notebook填入公开脚本的【分享链接】  
-shared_notebook: ""    
-enable_kaggle_extension: true  
-enable_cpolar_extension: true    #使用frp就将这个改成false
-cpolar_check_interval: 180  
-kaggle_change_account_interval: 39600  
-  
-kaggle_accounts:  
-  - email: "你的邮箱"  
-    password: "你的密码"  
-  - email: "你的第二个邮箱"  
-    password: "你的第二个密码"  #以此类推  
-cpolar:                  #使用frp不用填
-  email: "cpolar的邮箱"  
-  password: "cpolar的密码"  
+proxy: ""        #浏览器使用的代理
+quest_proxy: ""  #反代请求时使用的代理地址，如果开启代理后，Achernar反代不能正常工作请填写此项。你代理软件的http代理地址。
+port: 3529
+shared_notebook: "dania-fix.ipynb"    #ipynb文件下载到本地，放到根目录
+enable_kaggle_extension: true
+enable_cpolar_extension: true
+enable_get_dynamic_ip: false   #你一般用不到，这是个人提供的frp服务。不可与cpolar同时开启
+cpolar_check_interval: 180
+kaggle_change_account_interval: 43050
+
+kaggle_accounts:
+  - username: "方便你自己记的账户名"
+    key: "KGAT_xxxxxx"
+  - username: "方便你自己记的账户名"
+    key: "KGAT_xxxxxx"
+cpolar:
+  email: "cpolar的邮箱"
+  password: "cpolar的密码"
+get_dynamic_ip:   #通过url获取动态ip
+  url: ""
+  port1: 11111
+  port2: 22222
+
 ```  
 **运行Achernar主程序/启动脚本.bat**  
   
-(建议开启代理，并设置为pac模式/规则代理模式，将有助于稳定运行。
-如遇连接失败
-- 1.确保kaggle脚本已运行，且cpolar/frp服务正常运行(可以打开连接地址)
-- 2.开启规则代理，将cpolar/frp域名连接规则设置为直连。如使用cpolar，由于二级域名不固定，建议用域名keywords即cpolar关键字匹配
+建议开启代理，并设置为pac模式/规则代理模式，将有助于稳定运行。    
+如遇连接失败    
+- 1.确保kaggle脚本已运行，且cpolar/frp服务正常运行(可以打开连接地址)    
+- 2.开启规则代理，将cpolar/frp域名连接规则设置为直连。如使用cpolar，由于二级域名不固定，建议用域名keywords即cpolar关键字匹配    
 
-以clash配置文件为例，为规则代理添加以下两条规则
+以clash配置文件为例，为规则代理添加以下两条规则    
 ```
 rules:
   - DOMAIN-KEYWORD,cpolar,DIRECT
   - DOMAIN-KEYWORD,frp,DIRECT
 ```
-)
-# 注意
-同一脚本如果save version次数过多，打开时会非常卡顿，将影响achernar正常工作。建议在save version超过30后更换新的shared_notebook链接。
-# 鸣谢
-[spawner](https://github.com/spawner1145) 提供了Achernar的账号切换脚本原型，以及编写了优秀的kaggle脚本。
+

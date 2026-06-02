@@ -2,4 +2,4 @@ PyYAML
 requests~=2.32.3
 beautifulsoup4~=4.12.3
 Flask~=3.1.0
-playwright
+kaggle

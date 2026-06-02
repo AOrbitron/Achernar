@@ -161,34 +161,54 @@ def main():
             return
 
         index = 0
+        retry_count = 0  # 记录当前账号的连续失败次数
+        max_retries = 3  # 设置最大重试次数
+        retry_interval = 60  # 失败后的重试等待时间（秒）
+
         while True:
             account = accounts[index]
             username = account.get('username')
-            # 兼容旧配置(如果还没改完的话)
             key = account.get('key') or account.get('password')
-            # 读取当前账号的专属代理
-            account_proxy = account.get('proxy') or data['quest_proxy']
+            account_proxy = account.get('proxy') or data.get('quest_proxy')
 
             if not username or not key:
                 print(f"⚠️ 账号配置缺失 (缺少 username 或 key): {account}")
                 index = (index + 1) % len(accounts)
                 continue
 
-            print(f"\n========== 开始第 {index + 1} 次运行，使用账户：{username} ==========")
+            if retry_count == 0:
+                print(f"\n========== 开始第 {index + 1} 个账户运行，账号：{username} ==========")
+            else:
+                print(f"\n========== 账号：{username} (第 {retry_count}/{max_retries} 次重试) ==========")
 
             # 运行提交任务
             success = run_notebook_via_cli(username, key, notebook_file, account_proxy)
 
-            if not success:
-                print("提交遇到错误，将在下一次循环中重试。")
+            if success:
+                # 提交成功：重置重试次数，执行正常的长休眠，并切换到下一个账号
+                retry_count = 0
+                interval = data.get('kaggle_change_account_interval', 43050)
+                print(f"[{username}] 提交成功，等待 {interval} 秒后切换下一个账号...")
+                time.sleep(interval)
 
-            interval = data.get('kaggle_change_account_interval', 43050)
-            print(f"等待 {interval} 秒后切换下一个账号...")
-            time.sleep(interval)
+                index = (index + 1) % len(accounts)
 
-            index += 1
-            if index >= len(accounts):
-                index = 0
+            else:
+                # 提交失败：增加重试次数
+                retry_count += 1
+                if retry_count <= max_retries:
+                    # 还在重试次数内：短休眠，不增加 index（下次循环依然是当前账号）
+                    print(f"[{username}] 提交遇到错误，{retry_interval} 秒后进行第 {retry_count} 次重试...")
+                    time.sleep(retry_interval)
+                else:
+                    # 超过最大重试次数：放弃当前账号，切换下一个
+                    print(f"[{username}] 连续 {max_retries} 次提交失败，放弃当前账号，切换下一个。")
+                    retry_count = 0  # 重置重试状态给下一个账号用
+
+                    # 可选：如果希望即便失败也要等很久才切号，把这里的 time.sleep 改成长休眠
+                    time.sleep(5)
+
+                    index = (index + 1) % len(accounts)
 
     except Exception as e:
         print(f"\033[91m任务中断：{str(e)}\033[0m")

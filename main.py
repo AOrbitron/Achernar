@@ -91,9 +91,11 @@ def run_notebook_via_cli(username, key, notebook_file, account_proxy=None):
         shutil.copy(notebook_file, os.path.join(temp_folder, notebook_file))
 
         # 格式化项目名 (全小写，替换下划线为横杠)
-        kernel_slug = notebook_file.split('.')[0].lower().replace('_', '-')
-        if len(kernel_slug) < 5:
-            kernel_slug += "-task"
+        base_slug = notebook_file.split('.')[0].lower().replace('_', '-')
+
+        # 【新增】：生成 5 位随机数字作为后缀，确保每次提交都是独立的新项目
+        random_suffix = str(random.randint(10000, 99999))
+        kernel_slug = f"{base_slug}-{random_suffix}"
 
         # 生成 metadata
         meta = {

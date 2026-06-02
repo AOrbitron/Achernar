@@ -107,7 +107,10 @@ def run_notebook_via_cli(username, key, notebook_file, account_proxy=None):
             "is_private": "true",
             "enable_gpu": "true",
             "enable_internet": "true",
-            "dataset_sources": [],
+            "dataset_sources": [
+                "spawnerqwq/ndandaknan",
+                "leaffallen/net-tools-new"
+            ],
             "competition_sources": [],
             "kernel_sources": []
         }
